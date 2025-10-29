@@ -24,8 +24,8 @@ export default function ProfileSettings() {
     degree: "BSc",
     major: "Software Engineering",
     workAuth: "Citizen/PR",
-    seeking: new Set() < string > ["Internship", "Co-op"],
-    workMode: new Set() < string > ["Remote", "Hybrid", "On-site"],
+    seeking: new Set<string>(["Internship", "Co-op"]),
+    workMode: new Set<string>(["Remote", "Hybrid", "On-site"]),
     roles: ["Software Engineer", "Data Analyst"],
     skills: ["Python", "React", "SQL"],
     linkedin: "",
@@ -33,12 +33,12 @@ export default function ProfileSettings() {
     website: "",
   });
 
-  const [resumeFile, setResumeFile] = (useState < File) | (null > null);
-  const [transcriptFile, setTranscriptFile] = (useState < File) | (null > null);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
 
   // --- Avatar upload ---
-  const [avatar, setAvatar] = (useState < string) | (null > null);
-  const fileInputRef = (useRef < HTMLInputElement) | (null > null);
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleAvatar = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -99,7 +99,7 @@ export default function ProfileSettings() {
               }}>
               Cancel
             </Button>
-            <Button onClick={saveProfile} className="gap-2">
+            <Button variant="destructive" onClick={saveProfile} className="gap-2">
               <Check className="h-4 w-4" /> Save Changes
             </Button>
           </div>
@@ -255,7 +255,7 @@ export default function ProfileSettings() {
                   {["Internship", "Co-op", "Full-time"].map((opt) => (
                     <button
                       key={opt}
-                      className={`px-2.5 py-1 rounded-full border text-sm ${profile.seeking.has(opt) ? "bg-slate-900 text-white border-slate-900" : "bg-white"}`}
+                      className={`px-2.5 py-1 rounded-full border text-sm ${profile.seeking.has(opt) ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white"}`}
                       onClick={() => setProfile({ ...profile, seeking: toggleSet(profile.seeking, opt) })}>
                       {opt}
                     </button>
@@ -268,7 +268,7 @@ export default function ProfileSettings() {
                   {["Remote", "Hybrid", "On-site"].map((opt) => (
                     <button
                       key={opt}
-                      className={`px-2.5 py-1 rounded-full border text-sm ${profile.workMode.has(opt) ? "bg-slate-900 text-white border-slate-900" : "bg-white"}`}
+                      className={`px-2.5 py-1 rounded-full border text-sm ${profile.workMode.has(opt) ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white"}`}
                       onClick={() => setProfile({ ...profile, workMode: toggleSet(profile.workMode, opt) })}>
                       {opt}
                     </button>

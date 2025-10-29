@@ -1,3 +1,4 @@
+"use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Search, MapPin, Clock, Calendar, Building2, ArrowRight, Bookmark, BookmarkCheck, ChevronRight, Filter, ExternalLink, Tag } from "lucide-react";

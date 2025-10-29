@@ -46,7 +46,7 @@ export default function JobDetailAurora() {
             <Button variant="outline" size="sm" className="gap-2">
               <Share2 className="h-4 w-4" /> Share
             </Button>
-            <Button className="gap-2" onClick={() => (window.location.href = "/apply/aurora-robotics-lab")}>
+            <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/apply/aurora-robotics-lab")}>
               Apply Now <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
@@ -209,6 +209,7 @@ export default function JobDetailAurora() {
             <CardHeader className="pb-2">
               <h3 className="text-sm font-semibold">At a glance</h3>
             </CardHeader>
+
             <CardContent className="text-sm text-muted-foreground space-y-2">
               <div className="flex items-center justify-between">
                 <span>Posted</span>
@@ -231,10 +232,13 @@ export default function JobDetailAurora() {
                 <span>{job.teams.join(", ")}</span>
               </div>
             </CardContent>
-            <CardFooter className="gap-2">
-              <Button className="w-full gap-2" onClick={() => (window.location.href = "/apply/aurora-robotics-lab")}>
+
+            {/* fix starts here */}
+            <CardFooter className="flex flex-col gap-2 w-full">
+              <Button variant="destructive" className="w-full gap-2" onClick={() => (window.location.href = "/apply/aurora-robotics-lab")}>
                 Apply Now <ChevronRight className="h-4 w-4" />
               </Button>
+
               <Button variant="secondary" className="w-full gap-2" onClick={() => setSaved((s) => !s)}>
                 {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
                 {saved ? "Saved" : "Save job"}

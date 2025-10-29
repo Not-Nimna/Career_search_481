@@ -1,15 +1,7 @@
+"use client";
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import {
-  FileText,
-  Building2,
-  Calendar,
-  Clock,
-  BadgeCheck,
-  Search,
-  ArrowRight,
-  Filter,
-} from "lucide-react";
+import { FileText, Building2, Calendar, Clock, BadgeCheck, Search, ArrowRight, Filter } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,13 +51,11 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function ApplicationsPage() {
   const [query, setQuery] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string | null>(null);
+  const [filterStatus, setFilterStatus] = (useState < string) | (null > null);
 
   const filtered = useMemo(() => {
     return APPLICATIONS.filter((a) => {
-      const matchesQuery =
-        a.jobTitle.toLowerCase().includes(query.toLowerCase()) ||
-        a.company.toLowerCase().includes(query.toLowerCase());
+      const matchesQuery = a.jobTitle.toLowerCase().includes(query.toLowerCase()) || a.company.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = !filterStatus || a.status === filterStatus;
       return matchesQuery && matchesStatus;
     });
@@ -77,16 +67,16 @@ export default function ApplicationsPage() {
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
         <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <FileText className="h-5 w-5"/>
+            <FileText className="h-5 w-5" />
             <span className="font-semibold">My Applications</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="relative w-[min(60vw,360px)]">
-              <Input placeholder="Search jobs or companies…" value={query} onChange={(e)=> setQuery(e.target.value)} className="h-9 pl-9" />
+              <Input placeholder="Search jobs or companies…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-9 pl-9" />
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             </div>
-            <Button variant="outline" size="sm" className="gap-2" onClick={()=> setFilterStatus(null)}>
-              <Filter className="h-4 w-4"/> Clear Filters
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => setFilterStatus(null)}>
+              <Filter className="h-4 w-4" /> Clear Filters
             </Button>
           </div>
         </div>
@@ -96,13 +86,7 @@ export default function ApplicationsPage() {
         {/* Quick Filter Chips */}
         <div className="flex flex-wrap gap-2">
           {[...new Set(APPLICATIONS.map((a) => a.status))].map((s) => (
-            <button
-              key={s}
-              onClick={() => setFilterStatus(filterStatus === s ? null : s)}
-              className={`px-2.5 py-1 rounded-full border text-sm transition ${
-                filterStatus === s ? "bg-slate-900 text-white border-slate-900" : "bg-white"
-              }`}
-            >
+            <button key={s} onClick={() => setFilterStatus(filterStatus === s ? null : s)} className={`px-2.5 py-1 rounded-full border text-sm transition ${filterStatus === s ? "bg-slate-900 text-white border-slate-900" : "bg-white"}`}>
               {s}
             </button>
           ))}
@@ -126,14 +110,18 @@ export default function ApplicationsPage() {
                 </CardHeader>
                 <CardContent className="text-sm text-muted-foreground space-y-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center gap-1"><Calendar className="h-4 w-4"/> Submitted {app.submitted}</span>
-                    <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4"/> Deadline {app.deadline}</span>
+                    <span className="inline-flex items-center gap-1">
+                      <Calendar className="h-4 w-4" /> Submitted {app.submitted}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="h-4 w-4" /> Deadline {app.deadline}
+                    </span>
                   </div>
                   <div className="inline-flex items-center gap-1 text-xs text-slate-500 mt-1">{app.location}</div>
                   <div className="inline-flex items-center gap-1 text-xs text-slate-500">Type: {app.type}</div>
                 </CardContent>
                 <CardFooter className="justify-end">
-                  <Button variant="secondary" className="gap-2 w-full" onClick={()=> alert(`Opening ${app.id}`)}>
+                  <Button variant="secondary" className="gap-2 w-full" onClick={() => alert(`Opening ${app.id}`)}>
                     View Application <ArrowRight className="h-4 w-4" />
                   </Button>
                 </CardFooter>
@@ -143,18 +131,14 @@ export default function ApplicationsPage() {
 
           {filtered.length === 0 && (
             <Card className="col-span-full rounded-2xl">
-              <CardContent className="py-12 text-center text-muted-foreground">
-                No applications found. Try adjusting your filters.
-              </CardContent>
+              <CardContent className="py-12 text-center text-muted-foreground">No applications found. Try adjusting your filters.</CardContent>
             </Card>
           )}
         </div>
       </main>
 
       <footer className="border-t bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">
-          Track the progress of all your internship and co‑op applications in one place.
-        </div>
+        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">Track the progress of all your internship and co‑op applications in one place.</div>
       </footer>
     </div>
   );
