@@ -1,7 +1,9 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, MapPin, Clock, ExternalLink, GraduationCap, Calendar, Briefcase, Building2, Filter, Star, ArrowRight, Bookmark } from "lucide-react";
+import { Search, MapPin, Clock, ExternalLink, GraduationCap, Calendar, Briefcase, Building2, Filter, Star, ArrowRight, Bookmark, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,6 +79,15 @@ const DEADLINES = [
   { label: "Maple Vision AI — ML Intern", date: "Nov 20", href: "#" },
   { label: "Prairie Health — Data Co‑op", date: "Nov 12", href: "#" },
   { label: "Northstar Energy — DevOps Intern", date: "Nov 18", href: "#" },
+  // New tasks / deadlines
+  { label: "Pixel & Pine — Product Design Intern", date: "Nov 10", href: "#" },
+  { label: "Sentinel Networks — Cybersecurity Co-op", date: "Nov 5", href: "#" },
+  { label: "Aurora Robotics Lab — SWE Intern", date: "Nov 15", href: "#" },
+  { label: "UCalgary CS Club — Hackathon Registration", date: "Nov 3", href: "#" },
+  { label: "RBC — New Grad SWE", date: "Dec 1", href: "#" },
+  { label: "Google STEP Intern — Application", date: "Dec 5", href: "#" },
+  { label: "Amazon Propel — Online Assessment", date: "Dec 7", href: "#" },
+  { label: "TD — Data Science Co-op", date: "Dec 9", href: "#" },
 ];
 
 const QUICK_LINKS = [
@@ -160,6 +171,8 @@ function JobCard({ job }: { job: (typeof JOBS)[number] }) {
 export default function CareerHome() {
   const [query, setQuery] = useState("");
   const [onlyRemote, setOnlyRemote] = useState(false);
+  const [showAllDeadlines, setShowAllDeadlines] = useState(false);
+  const router = useRouter();
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
@@ -220,7 +233,13 @@ export default function CareerHome() {
                   <Button variant="outline" className="h-12 gap-2" onClick={() => setOnlyRemote((v) => !v)}>
                     <Filter className="h-4 w-4" /> {onlyRemote ? "Remote Only ✓" : "Remote Only"}
                   </Button>
-                  <Button variant="destructive" className="h-12 gap-2">
+                  <Button
+                    variant="destructive"
+                    className="h-12 gap-2"
+                    onClick={() => {
+                      const q = query.trim();
+                      router.push(`/jobsearch${q ? `?q=${encodeURIComponent(q)}` : ""}`);
+                    }}>
                     <Search className="h-5 w-5" /> Search
                   </Button>
                 </div>
@@ -241,7 +260,7 @@ export default function CareerHome() {
           </div>
 
           {/* Deadlines at a glance */}
-          <aside id="deadlines" className="lg:col-span-1">
+          <aside id="deadlines" className="lg:col-span-1 relative">
             <Card className="rounded-2xl">
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -249,8 +268,9 @@ export default function CareerHome() {
                   <h2 className="text-lg font-semibold">Deadlines at a Glance</h2>
                 </div>
               </CardHeader>
+
               <CardContent className="space-y-3">
-                {DEADLINES.map((d) => (
+                {DEADLINES.slice(0, 4).map((d) => (
                   <a key={d.label} href={d.href} className="flex items-center justify-between rounded-xl border p-3 hover:bg-slate-50">
                     <span className="text-sm font-medium leading-tight">{d.label}</span>
                     <Badge className="rounded-full" variant="secondary">
@@ -259,12 +279,56 @@ export default function CareerHome() {
                   </a>
                 ))}
               </CardContent>
+
               <CardFooter>
-                <Button variant="ghost" className="w-full">
+                <Button variant="ghost" className="w-full" onClick={() => setShowAllDeadlines(true)}>
                   View all deadlines
                 </Button>
               </CardFooter>
             </Card>
+
+            {/* ✅ DEADLINES MODAL OVERLAY (ADD THIS PART) */}
+            {showAllDeadlines && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl px-4">
+                  <Card className="rounded-2xl shadow-xl border max-h-[85vh] flex flex-col">
+                    <CardHeader className="flex flex-row items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-5 w-5" />
+                        <div>
+                          <h2 className="text-lg font-semibold">All Deadlines</h2>
+                          <p className="text-xs text-muted-foreground">All upcoming assessments & application cut-offs.</p>
+                        </div>
+                      </div>
+                      <Button variant="ghost" size="icon" onClick={() => setShowAllDeadlines(false)}>
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </CardHeader>
+
+                    {/* 🔥 Scrollable list area */}
+                    <CardContent className="space-y-3 overflow-y-auto pr-1 max-h-[60vh]">
+                      {DEADLINES.map((d) => (
+                        <a key={d.label} href={d.href} className="flex items-center justify-between rounded-xl border px-3 py-2.5 hover:bg-slate-50">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium leading-tight">{d.label}</span>
+                            <span className="text-xs text-muted-foreground">Application deadline</span>
+                          </div>
+                          <Badge className="rounded-full" variant="secondary">
+                            {d.date}
+                          </Badge>
+                        </a>
+                      ))}
+                    </CardContent>
+
+                    <CardFooter className="flex justify-end gap-2 border-t bg-slate-50/60">
+                      <Button variant="outline" onClick={() => setShowAllDeadlines(false)}>
+                        Back
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              </div>
+            )}
           </aside>
         </div>
       </section>
@@ -273,9 +337,12 @@ export default function CareerHome() {
       <section id="jobs" className="mx-auto max-w-7xl px-4 pb-12">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Recommended for You</h2>
-          <Button variant="ghost" className="gap-2">
-            See more <ArrowRight className="h-4 w-4" />
-          </Button>
+          <Link href="/jobsearch" passHref>
+            <Button variant="ghost" className="gap-2">
+              See more...
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {filtered.map((job) => (
@@ -314,6 +381,9 @@ export default function CareerHome() {
 
       {/* Resources & CTA */}
       <section id="resources" className="mx-auto max-w-7xl px-4 py-12">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Resources</h2>
+        </div>
         <Card className="rounded-2xl">
           <CardContent className="md:flex items-center justify-between gap-6 py-8">
             <div>

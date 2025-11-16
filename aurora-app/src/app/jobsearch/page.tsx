@@ -1,5 +1,7 @@
 "use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+
 import { motion } from "framer-motion";
 import { Search, MapPin, Clock, Calendar, Building2, ArrowRight, Bookmark, BookmarkCheck, ChevronRight, Filter, ExternalLink, Tag, X } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -424,6 +426,13 @@ const applyFilters = (jobs: Job[], f: Filters): Job[] => {
 // --- Layout ---
 export default function JobSearchPage() {
   const [query, setQuery] = useState("");
+  const params = useSearchParams();
+  const q = params.get("q") || "";
+  //use the q to auto fill the search query on initial load
+  useEffect(() => {
+    setQuery(q);
+  }, [q]);
+
   const [saved, setSaved] = useState<Record<string, boolean>>({});
   const [selectedId, setSelectedId] = useState<string | null>(JOBS[0]?.id ?? null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
@@ -443,8 +452,15 @@ export default function JobSearchPage() {
   //     setSelectedId(filtered[0].id);
   //   }
   // }, [filtered, selectedId]);
+  const effectiveSelectedId = useMemo(() => {
+    if (!filtered.length) return null;
+    const exists = filtered.some((j) => j.id === selectedId);
+    return exists ? selectedId : filtered[0].id;
+  }, [filtered, selectedId]);
 
-  const selectedJob = useMemo(() => filtered.find((j) => j.id === selectedId) || filtered[0], [filtered, selectedId]);
+  const selectedJob = useMemo(() => (effectiveSelectedId ? filtered.find((j) => j.id === effectiveSelectedId) ?? filtered[0] : undefined), [filtered, effectiveSelectedId]);
+
+  // const selectedJob = useMemo(() => filtered.find((j) => j.id === selectedId) || filtered[0], [filtered, selectedId]);
 
   const toggleSave = useCallback((id: string) => setSaved((s) => ({ ...s, [id]: !s[id] })), []);
 
@@ -454,23 +470,28 @@ export default function JobSearchPage() {
   }, [filters]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="relative min-h-screen bg-gradient-to-b from-white to-slate-50">
+      {/* Full-screen dim + blur when filters are open */}
+      {showFilters && <div className="fixed inset-0 z-20 bg-black/30 backdrop-blur-sm" onClick={() => setShowFilters(false)} />}
+
       {/* Minimized search bar — top-left */}
-      <div className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
+      <div className="sticky top-0 z-30 border-b bg-white/80">
         <div className="relative mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
           <div className="relative w-full max-w-md">
             <Input aria-label="Search jobs" placeholder="Search roles, skills, company…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 pl-9" />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
+
           <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowFilters((v) => !v)}>
             <Filter className="h-4 w-4" /> Filters {activeCount ? `(${activeCount})` : ""}
           </Button>
 
+          {/* Filters Popover (sits above overlay because of z-40 inside) */}
           {showFilters && <FiltersPopover allTags={allTags} allTypes={allTypes} allWorkModes={allWorkModes} allLocations={allLocations} value={filters} onChange={setFilters} onClose={() => setShowFilters(false)} />}
         </div>
       </div>
 
-      {/* Two‑pane layout */}
+      {/* Two-pane layout */}
       <div className="mx-auto max-w-7xl px-4 py-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left: list */}
         <aside className="lg:col-span-5 xl:col-span-4">
@@ -489,7 +510,14 @@ export default function JobSearchPage() {
                 {filters.workModes.map((m) => (
                   <span key={m} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
                     {m}
-                    <button aria-label={`remove ${m}`} onClick={() => setFilters({ ...filters, workModes: filters.workModes.filter((x) => x !== m) })}>
+                    <button
+                      aria-label={`remove ${m}`}
+                      onClick={() =>
+                        setFilters({
+                          ...filters,
+                          workModes: filters.workModes.filter((x) => x !== m),
+                        })
+                      }>
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -497,7 +525,14 @@ export default function JobSearchPage() {
                 {filters.types.map((t) => (
                   <span key={t} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
                     {t}
-                    <button aria-label={`remove ${t}`} onClick={() => setFilters({ ...filters, types: filters.types.filter((x) => x !== t) })}>
+                    <button
+                      aria-label={`remove ${t}`}
+                      onClick={() =>
+                        setFilters({
+                          ...filters,
+                          types: filters.types.filter((x) => x !== t),
+                        })
+                      }>
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -505,7 +540,14 @@ export default function JobSearchPage() {
                 {filters.locations.map((l) => (
                   <span key={l} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
                     {l}
-                    <button aria-label={`remove ${l}`} onClick={() => setFilters({ ...filters, locations: filters.locations.filter((x) => x !== l) })}>
+                    <button
+                      aria-label={`remove ${l}`}
+                      onClick={() =>
+                        setFilters({
+                          ...filters,
+                          locations: filters.locations.filter((x) => x !== l),
+                        })
+                      }>
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -513,7 +555,14 @@ export default function JobSearchPage() {
                 {filters.tags.map((t) => (
                   <span key={t} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
                     {t}
-                    <button aria-label={`remove ${t}`} onClick={() => setFilters({ ...filters, tags: filters.tags.filter((x) => x !== t) })}>
+                    <button
+                      aria-label={`remove ${t}`}
+                      onClick={() =>
+                        setFilters({
+                          ...filters,
+                          tags: filters.tags.filter((x) => x !== t),
+                        })
+                      }>
                       <X className="h-3 w-3" />
                     </button>
                   </span>
@@ -543,7 +592,7 @@ export default function JobSearchPage() {
             </CardHeader>
             <CardContent className="p-3 pt-0 overflow-y-auto h-full space-y-3">
               {filtered.map((job) => (
-                <JobListItem key={job.id} job={job} selected={selectedId === job.id} saved={!!saved[job.id]} onSelect={() => setSelectedId(job.id)} onSave={() => toggleSave(job.id)} />
+                <JobListItem key={job.id} job={job} selected={effectiveSelectedId === job.id} saved={!!saved[job.id]} onSelect={() => setSelectedId(job.id)} onSave={() => toggleSave(job.id)} />
               ))}
               {filtered.length === 0 && <div className="text-sm text-muted-foreground p-6 text-center">No results. Try adjusting filters.</div>}
             </CardContent>
@@ -565,7 +614,7 @@ export default function JobSearchPage() {
 
         {/* Mobile helper (below detail) */}
         <div className="lg:hidden">
-          <div className="mt-2 text-center text-xs text-muted-foreground">Tip: On larger screens, the list and details sit side‑by‑side.</div>
+          <div className="mt-2 text-center text-xs text-muted-foreground">Tip: On larger screens, the list and details sit side-by-side.</div>
         </div>
       </div>
     </div>

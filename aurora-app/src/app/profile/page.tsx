@@ -1,5 +1,6 @@
 "use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -7,6 +8,7 @@ const LoginPage: React.FC = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,9 +28,13 @@ const LoginPage: React.FC = () => {
       setIsSubmitting(true);
       // TODO: replace with real auth call
       console.log({ email, password, rememberMe });
+      // naviagegate to dashboard or home page upon success
+      router.push("/home");
+
       // e.g. await signIn("credentials", { redirect: true, email, password });
     } catch (err) {
       setError("Something went wrong while signing you in. Please try again.");
+      console.error("Login error:", err);
     } finally {
       setIsSubmitting(false);
     }
