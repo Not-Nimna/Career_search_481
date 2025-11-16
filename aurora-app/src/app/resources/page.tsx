@@ -20,6 +20,9 @@ export type Resource = {
   blurb: string;
   href?: string;
 };
+type KindFilter = "All" | Resource["kind"];
+
+const KIND_OPTIONS: KindFilter[] = ["All", "Seminar", "Workshop", "Toolkit", "Guide", "Webinar", "Panel", "Video Series"];
 
 // --- Mock data ---
 const RESOURCES: Resource[] = [
@@ -183,11 +186,12 @@ function ResourceCard({ r, saved, onSave }: { r: Resource; saved: boolean; onSav
 }
 
 export default function ResourcesPage() {
+  type KindFilter = (typeof KIND_OPTIONS)[number];
   const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<Resource["kind"] | "All">("All");
+  const [typeFilter, setTypeFilter] = useState<KindFilter>("All");
   const [saved, setSaved] = useState<Record<string, boolean>>({});
 
-  const allKinds = useMemo(() => ["All", ...(Array.from(new Set(RESOURCES.map((r) => r.kind))) as (Resource["kind"] | "All")[])], []);
+  const allKinds = useMemo<KindFilter[]>(() => KIND_OPTIONS, []);
   const allTags = useMemo(() => Array.from(new Set(RESOURCES.flatMap((r) => r.tags))).sort(), []);
 
   const [tagFilter, setTagFilter] = useState<string | null>(null);
@@ -241,7 +245,10 @@ export default function ResourcesPage() {
               <span className="text-sm text-muted-foreground">Type:</span>
               <div className="flex flex-wrap gap-2">
                 {allKinds.map((k) => (
-                  <button key={k} onClick={() => setTypeFilter(k)} className={`px-2.5 py-1 rounded-full border text-sm ${typeFilter === k ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white"}`}>
+                  <button
+                    key={k}
+                    onClick={() => setTypeFilter(k)} // k is string, but setTypeFilter expects Resource["kind"] | "All"
+                  >
                     {k}
                   </button>
                 ))}

@@ -155,11 +155,14 @@ function DeadlineItem({ d }: { d: Deadline }) {
 
 export default function DeadlinesPage() {
   const [query, setQuery] = useState("");
-  const [typeFilter, setTypeFilter] = useState<Deadline["type"] | "All">("All");
+  // const [typeFilter, setTypeFilter] = useState<Deadline["type"] | "All">("All");
+  const TYPE_OPTIONS = ["All", "Internship", "Co-op", "New Grad", "Scholarship", "Event"] as const;
+  type TypeFilter = (typeof TYPE_OPTIONS)[number];
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>("All");
   const [monthFilter, setMonthFilter] = useState<string | "All">("All");
   const [tagFilter, setTagFilter] = useState<string | null>(null);
 
-  const allTypes = useMemo(() => ["All", ...(Array.from(new Set(DEADLINES.map((d) => d.type))) as (Deadline["type"] | "All")[])], []);
+  const allTypes = useMemo(() => TYPE_OPTIONS, []);
   const allMonths = useMemo(() => ["All", ...Array.from(new Set(DEADLINES.map((d) => new Date(d.dueISO).toLocaleString(undefined, { month: "long", year: "numeric" }))))], []);
   const allTags = useMemo(() => Array.from(new Set(DEADLINES.flatMap((d) => d.tags))).sort(), []);
 

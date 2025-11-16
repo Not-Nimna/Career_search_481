@@ -6,6 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 // --- Mock Data ---
 const JOBS = [
@@ -192,9 +193,11 @@ export default function CareerHome() {
               Resources
             </a>
           </nav>
-          <Button variant="destructive" size="sm" className="gap-2">
-            <ExternalLink className="h-4 w-4" /> Profile
-          </Button>
+          <Link href="/profile">
+            <Button variant="destructive" size="sm" className="gap-2">
+              <ExternalLink className="h-4 w-4" /> Profile
+            </Button>
+          </Link>
         </div>
       </header>
 

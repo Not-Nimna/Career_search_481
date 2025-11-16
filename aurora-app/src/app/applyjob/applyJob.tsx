@@ -19,6 +19,9 @@ const PREFILL = {
   github: "github.com/johnsmith",
   linkedin: "linkedin.com/in/johnsmith",
 };
+type WorkMode = "Remote" | "Hybrid" | "On-site";
+
+const WORK_MODES: WorkMode[] = ["Remote", "Hybrid", "On-site"];
 
 const MAX_MB = 10;
 const ACCEPT = {
@@ -43,6 +46,10 @@ export default function AuroraSinglePageApply() {
     }),
     []
   );
+  type PersonalState = {
+    // ...other fields
+    workMode: WorkMode | null; // or WorkMode if it's always set
+  };
 
   // ---- Personal ----
   const [personal, setPersonal] = useState({
@@ -53,7 +60,7 @@ export default function AuroraSinglePageApply() {
     linkedin: PREFILL.linkedin,
     github: PREFILL.github,
     portfolio: PREFILL.portfolio,
-    workMode: "Hybrid" as "Remote" | "Hybrid" | "On‑site",
+    workMode: null,
     consent: false,
   });
 
@@ -206,16 +213,16 @@ export default function AuroraSinglePageApply() {
                 <div className="md:col-span-2">
                   <label className="text-sm font-medium">Preferred work mode</label>
                   <div className="flex gap-2 mt-1">
-                    {["Remote", "Hybrid", "On-site"].map((m) => (
+                    {WORK_MODES.map((m) => (
                       <button
                         key={m}
                         className={`px-2.5 py-1 rounded-full border text-sm transition-colors
-          ${
-            personal.workMode === m
-              ? "bg-[#FF6961] text-black border-[#FF6961]" // your red highlight
-              : "bg-white text-gray-700 hover:bg-[#FFE2E0]" // hover with light red tint
-          }`}
-                        onClick={() => setPersonal({ ...personal, workMode: m as any })}>
+          ${personal.workMode === m ? "bg-[#FF6961] text-black border-[#FF6961]" : "bg-white text-gray-700 hover:bg-[#FFE2E0]"}`}
+                        onClick={() =>
+                          setPersonal((prev) => ({
+                            ...prev,
+                          }))
+                        }>
                         {m}
                       </button>
                     ))}
@@ -411,7 +418,7 @@ export default function AuroraSinglePageApply() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">
-                    Describe a robotics/AI project you've built or contributed to <span className="text-rose-600">*</span>
+                    Describe a robotics/AI project you have built or contributed to <span className="text-rose-600">*</span>
                   </label>
                   <Textarea value={answers.project} onChange={(e) => setAnswers({ ...answers, project: e.target.value })} placeholder="Include your role, stack (e.g., Python, ROS, CV), and outcomes." rows={5} />
                   <div className={`text-xs mt-1 ${answers.project.length >= 50 ? "text-slate-500" : "text-rose-600"}`}>{answers.project.length}/50</div>

@@ -438,11 +438,11 @@ export default function JobSearchPage() {
 
   const filtered = useMemo(() => applyFilters(baseFiltered, filters), [baseFiltered, filters]);
 
-  useEffect(() => {
-    if (filtered.length && !filtered.find((j) => j.id === selectedId)) {
-      setSelectedId(filtered[0].id);
-    }
-  }, [filtered, selectedId]);
+  // useEffect(() => {
+  //   if (filtered.length && !filtered.find((j) => j.id === selectedId)) {
+  //     setSelectedId(filtered[0].id);
+  //   }
+  // }, [filtered, selectedId]);
 
   const selectedJob = useMemo(() => filtered.find((j) => j.id === selectedId) || filtered[0], [filtered, selectedId]);
 

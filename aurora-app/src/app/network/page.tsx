@@ -2,18 +2,63 @@
 
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, BadgeCheck, FileText, FileDown, Building2, Calendar, Clock, CheckCircle2, MessageSquare, Printer, Share2, Download, ExternalLink, Link, Paperclip, MapPin, User2, Mail, Phone, ChevronRight, XCircle } from "lucide-react";
+import { ArrowLeft, FileText, FileDown, Building2, Calendar, Clock, CheckCircle2, MessageSquare, Printer, Share2, Download, ExternalLink, Link as LinkIcon, Paperclip, MapPin, User2, Mail, ChevronRight, XCircle } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
-// This screen shows a *submitted* application when opened from the Applications tab.
-// Replace mocks with your API data.
+// --- Types ---
+type ApplicationStatus = "Submitted" | "Under Review" | "Interview Scheduled" | "Offer" | "Rejected";
 
-const MOCK_APP = {
+type Application = {
+  id: string;
+  status: ApplicationStatus;
+  submittedISO: string;
+  updatedISO: string;
+  job: {
+    id: string;
+    title: string;
+    company: string;
+    location: string;
+    deadlineISO: string;
+  };
+  personal: {
+    name: string;
+    email: string;
+    phone: string;
+    links: {
+      linkedin: string;
+      github: string;
+      portfolio: string;
+    };
+  };
+  documents: {
+    resume: { name: string; sizeMB: number };
+    transcript: { name: string; sizeMB: number };
+    cover?: { name: string; sizeMB: number };
+    extras: { name: string; sizeMB: number }[];
+  };
+  answers: {
+    why: string;
+    project: string;
+  };
+  timeline: { when: string; label: string }[];
+};
+
+// --- Status styles ---
+const STATUS_STYLES: Record<ApplicationStatus, string> = {
+  Submitted: "bg-slate-100 text-slate-800",
+  "Under Review": "bg-amber-100 text-amber-800",
+  "Interview Scheduled": "bg-blue-100 text-blue-800",
+  Offer: "bg-emerald-100 text-emerald-800",
+  Rejected: "bg-rose-100 text-rose-800",
+};
+
+// --- Mock data ---
+const MOCK_APP: Application = {
   id: "APP-2025-001",
-  status: "Under Review" as const, // "Submitted" | "Under Review" | "Interview Scheduled" | "Offer" | "Rejected"
+  status: "Under Review",
   submittedISO: "2025-10-28T12:03:00-06:00",
   updatedISO: "2025-10-29T09:12:00-06:00",
   job: {
@@ -26,7 +71,7 @@ const MOCK_APP = {
   personal: {
     name: "Nimna Wijedasa",
     email: "nimna.wijedasa@ucalgary.ca",
-    phone: "(403) 555‑1234",
+    phone: "(403) 555-1234",
     links: {
       linkedin: "linkedin.com/in/nimna",
       github: "github.com/nimna",
@@ -52,17 +97,21 @@ const MOCK_APP = {
   ],
 };
 
-const STATUS_STYLES: Record<typeof MOCK_APP.status | "Submitted" | "Offer" | "Rejected", string> = {
-  Submitted: "bg-slate-100 text-slate-800",
-  "Under Review": "bg-amber-100 text-amber-800",
-  "Interview Scheduled": "bg-blue-100 text-blue-800",
-  Offer: "bg-emerald-100 text-emerald-800",
-  Rejected: "bg-rose-100 text-rose-800",
-};
+// --- Utils ---
+const fmtDate = (iso: string) =>
+  new Date(iso).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 
-const fmtDate = (iso: string) => new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric" });
-const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+const fmtTime = (iso: string) =>
+  new Date(iso).toLocaleTimeString(undefined, {
+    hour: "numeric",
+    minute: "2-digit",
+  });
 
+// --- Component ---
 export default function ApplicationDetailCompleted() {
   const app = useMemo(() => MOCK_APP, []);
   const [note, setNote] = useState("");
@@ -140,6 +189,7 @@ export default function ApplicationDetailCompleted() {
               <h2 className="text-lg font-semibold">Submitted documents</h2>
             </CardHeader>
             <CardContent className="grid gap-3 text-sm">
+              {/* Resume */}
               <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border">
                 <div className="inline-flex items-center gap-2">
                   <FileText className="h-4 w-4" /> Resume
@@ -156,6 +206,8 @@ export default function ApplicationDetailCompleted() {
                   </Button>
                 </div>
               </div>
+
+              {/* Transcript */}
               <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border">
                 <div className="inline-flex items-center gap-2">
                   <FileText className="h-4 w-4" /> Transcript
@@ -172,6 +224,8 @@ export default function ApplicationDetailCompleted() {
                   </Button>
                 </div>
               </div>
+
+              {/* Cover letter */}
               {app.documents.cover && (
                 <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border">
                   <div className="inline-flex items-center gap-2">
@@ -190,6 +244,8 @@ export default function ApplicationDetailCompleted() {
                   </div>
                 </div>
               )}
+
+              {/* Extras */}
               {app.documents.extras.length > 0 && (
                 <div className="p-3 rounded-xl border">
                   <div className="text-sm font-medium mb-2">Supporting materials</div>
@@ -260,6 +316,7 @@ export default function ApplicationDetailCompleted() {
 
         {/* Right column: timeline & actions */}
         <aside className="lg:col-span-4 space-y-4">
+          {/* Timeline */}
           <Card className="rounded-2xl">
             <CardHeader className="pb-2">
               <h3 className="text-sm font-semibold">Status timeline</h3>
@@ -279,6 +336,7 @@ export default function ApplicationDetailCompleted() {
             </CardContent>
           </Card>
 
+          {/* Next steps */}
           <Card className="rounded-2xl">
             <CardHeader className="pb-2">
               <h3 className="text-sm font-semibold">Next steps</h3>
@@ -288,7 +346,7 @@ export default function ApplicationDetailCompleted() {
               <div className="text-xs">Tip: Prep algorithms + ROS basics and collect 2 project talking points.</div>
             </CardContent>
             <CardFooter className="flex flex-col gap-2">
-              <Button variant="secondary" className="w-full gap-2" onClick={() => alert("Message sent (mock)")}>
+              <Button variant="secondary" className="W-full gap-2" onClick={() => alert("Message sent (mock)")}>
                 <MessageSquare className="h-4 w-4" /> Message recruiter
               </Button>
               <Button variant="ghost" className="w-full gap-2 text-rose-600 hover:text-rose-700" onClick={() => confirm("Withdraw this application?") && alert("Application withdrawn (mock)")}>
@@ -297,6 +355,7 @@ export default function ApplicationDetailCompleted() {
             </CardFooter>
           </Card>
 
+          {/* Contact */}
           <Card className="rounded-2xl">
             <CardHeader className="pb-2">
               <h3 className="text-sm font-semibold">Contact</h3>
@@ -306,10 +365,10 @@ export default function ApplicationDetailCompleted() {
                 <User2 className="h-4 w-4" /> Recruiting Team
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" /> careers@aurora‑robotics.example
+                <Mail className="h-4 w-4" /> careers@aurora-robotics.example
               </div>
               <div className="flex items-center gap-2">
-                <Link className="h-4 w-4" />{" "}
+                <LinkIcon className="h-4 w-4" />{" "}
                 <a className="underline" href="/jobs/aurora-robotics-lab">
                   Job posting
                 </a>
