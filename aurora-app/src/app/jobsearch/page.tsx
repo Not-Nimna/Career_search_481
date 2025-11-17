@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { Search, MapPin, Clock, Calendar, Building2, ArrowRight, Bookmark, BookmarkCheck, ChevronRight, Filter, ExternalLink, Tag, X } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -472,21 +472,49 @@ export default function JobSearchPage() {
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Full-screen dim + blur when filters are open */}
-      {showFilters && <div className="fixed inset-0 z-20 bg-black/30 backdrop-blur-sm" onClick={() => setShowFilters(false)} />}
+      {showFilters && <div className="fixed inset-0 z-30 bg-black/30 backdrop-blur-sm" onClick={() => setShowFilters(false)} />}
 
-      {/* Minimized search bar — top-left */}
-      <div className="sticky top-0 z-30 border-b bg-white/80">
+      {/* 🔺 Global top bar (same as home) + page search row */}
+      <header className="sticky top-0 z-20 backdrop-blur bg-white/70 border-b">
+        {/* Top nav row */}
+        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
+            <span className="font-semibold">University Career Hub</span>
+          </div>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
+            {/* <a className="hover:text-foreground" href="/jobs">
+              Jobs
+            </a>
+            <a className="hover:text-foreground" href="/deadlines">
+              Deadlines
+            </a>
+            <a className="hover:text-foreground" href="/links">
+              Quick Links
+            </a>
+            <a className="hover:text-foreground" href="/resources">
+              Resources
+            </a> */}
+          </nav>
+          <Link href="/profile">
+            <Button variant="destructive" size="sm" className="gap-2">
+              <ExternalLink className="h-4 w-4" /> Profile
+            </Button>
+          </Link>
+        </div>
+      </header>
+      {/* Page-specific search + filters row */}
+      <div className="border-t border-slate-100">
         <div className="relative mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
           <div className="relative w-full max-w-md">
             <Input aria-label="Search jobs" placeholder="Search roles, skills, company…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 pl-9" />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
-
           <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowFilters((v) => !v)}>
             <Filter className="h-4 w-4" /> Filters {activeCount ? `(${activeCount})` : ""}
           </Button>
 
-          {/* Filters Popover (sits above overlay because of z-40 inside) */}
+          {/* Filters Popover (sits above overlay because popover uses z-40) */}
           {showFilters && <FiltersPopover allTags={allTags} allTypes={allTypes} allWorkModes={allWorkModes} allLocations={allLocations} value={filters} onChange={setFilters} onClose={() => setShowFilters(false)} />}
         </div>
       </div>

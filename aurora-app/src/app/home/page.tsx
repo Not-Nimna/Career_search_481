@@ -95,25 +95,25 @@ const QUICK_LINKS = [
     title: "Applications",
     desc: "Track submissions, statuses, and interview times.",
     icon: <Briefcase className="h-5 w-5" aria-hidden />,
-    href: "#",
+    route: "/Applications",
   },
   {
     title: "Resources",
     desc: "Resume templates, cover letters, and guides.",
     icon: <GraduationCap className="h-5 w-5" aria-hidden />,
-    href: "#",
+    route: "/resources",
   },
   {
     title: "Deadlines",
     desc: "All upcoming cut‑offs in one place.",
     icon: <Calendar className="h-5 w-5" aria-hidden />,
-    href: "#",
+    route: "/deadlines",
   },
   {
     title: "Networking",
     desc: "Clubs, alumni, mentors, and events.",
     icon: <Building2 className="h-5 w-5" aria-hidden />,
-    href: "#",
+    route: "/network",
   },
 ];
 
@@ -362,9 +362,10 @@ export default function CareerHome() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold">Quick Links</h2>
           </div>
+
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
             {QUICK_LINKS.map((q) => (
-              <a key={q.title} href={q.href} className="group rounded-2xl border p-5 bg-gradient-to-br from-slate-50 to-white hover:shadow-md transition-shadow">
+              <div key={q.title} onClick={() => router.push(q.route)} className="group rounded-2xl border p-5 bg-gradient-to-br from-slate-50 to-white hover:shadow-md transition-shadow cursor-pointer">
                 <div className="flex items-center gap-3">
                   <span className="rounded-xl p-2 border bg-white">{q.icon}</span>
                   <span className="font-medium">{q.title}</span>
@@ -373,7 +374,7 @@ export default function CareerHome() {
                 <div className="mt-4 inline-flex items-center gap-2 text-sm text-primary">
                   Open <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                 </div>
-              </a>
+              </div>
             ))}
           </div>
         </div>

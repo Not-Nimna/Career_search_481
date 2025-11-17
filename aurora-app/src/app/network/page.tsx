@@ -2,384 +2,340 @@
 
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, FileText, FileDown, Building2, Calendar, Clock, CheckCircle2, MessageSquare, Printer, Share2, Download, ExternalLink, Link as LinkIcon, Paperclip, MapPin, User2, Mail, ChevronRight, XCircle } from "lucide-react";
+import { Users2, Search, GraduationCap, Briefcase, MapPin, Clock, Calendar, Mail, ExternalLink, Linkedin, MessageSquare, Globe, ChevronRight, Star, Filter, PhoneCall, Video } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
-// --- Types ---
-type ApplicationStatus = "Submitted" | "Under Review" | "Interview Scheduled" | "Offer" | "Rejected";
-
-type Application = {
+// --- Mock Data ---
+export type Person = {
   id: string;
-  status: ApplicationStatus;
-  submittedISO: string;
-  updatedISO: string;
-  job: {
-    id: string;
-    title: string;
-    company: string;
-    location: string;
-    deadlineISO: string;
-  };
-  personal: {
-    name: string;
-    email: string;
-    phone: string;
-    links: {
-      linkedin: string;
-      github: string;
-      portfolio: string;
-    };
-  };
-  documents: {
-    resume: { name: string; sizeMB: number };
-    transcript: { name: string; sizeMB: number };
-    cover?: { name: string; sizeMB: number };
-    extras: { name: string; sizeMB: number }[];
-  };
-  answers: {
-    why: string;
-    project: string;
-  };
-  timeline: { when: string; label: string }[];
+  name: string;
+  headline: string; // e.g., "SWE @ Shopify"
+  classYear: string;
+  degree: string;
+  location: string;
+  skills: string[];
+  willingTo: string[]; // [Mentor, Coffee chat, Resume review]
+  links?: { linkedin?: string; website?: string; email?: string };
 };
 
-// --- Status styles ---
-const STATUS_STYLES: Record<ApplicationStatus, string> = {
-  Submitted: "bg-slate-100 text-slate-800",
-  "Under Review": "bg-amber-100 text-amber-800",
-  "Interview Scheduled": "bg-blue-100 text-blue-800",
-  Offer: "bg-emerald-100 text-emerald-800",
-  Rejected: "bg-rose-100 text-rose-800",
+const PEOPLE: Person[] = [
+  {
+    id: "p1",
+    name: "Aisha Patel",
+    headline: "SWE @ Shopify",
+    classYear: "'23",
+    degree: "BSc SE",
+    location: "Toronto, ON",
+    skills: ["React", "TypeScript", "Next.js"],
+    willingTo: ["Mentor", "Coffee chat"],
+    links: { linkedin: "#", website: "#", email: "aisha@example.com" },
+  },
+  {
+    id: "p2",
+    name: "Daniel Kim",
+    headline: "Data Scientist @ RBC",
+    classYear: "'21",
+    degree: "BSc CS",
+    location: "Calgary, AB",
+    skills: ["Python", "Pandas", "ML"],
+    willingTo: ["Resume review", "Coffee chat"],
+    links: { linkedin: "#", email: "daniel@example.com" },
+  },
+  {
+    id: "p3",
+    name: "Maya Singh",
+    headline: "PM @ Microsoft",
+    classYear: "'20",
+    degree: "BSc ENSF",
+    location: "Vancouver, BC",
+    skills: ["Product", "Roadmaps", "Interviews"],
+    willingTo: ["Mentor"],
+    links: { linkedin: "#", website: "#" },
+  },
+  {
+    id: "p4",
+    name: "Omar Hassan",
+    headline: "DevOps @ AWS",
+    classYear: "'19",
+    degree: "BSc SE",
+    location: "Remote – Canada",
+    skills: ["AWS", "Terraform", "CI/CD"],
+    willingTo: ["Mentor", "Resume review"],
+    links: { linkedin: "#" },
+  },
+];
+
+export type Event = {
+  id: string;
+  title: string;
+  host: string;
+  location: string;
+  when: string; // "Nov 12, 3:00–4:00 PM MT"
+  tags: string[];
+  rsvpUrl?: string;
 };
 
-// --- Mock data ---
-const MOCK_APP: Application = {
-  id: "APP-2025-001",
-  status: "Under Review",
-  submittedISO: "2025-10-28T12:03:00-06:00",
-  updatedISO: "2025-10-29T09:12:00-06:00",
-  job: {
-    id: "aurora-robotics-lab-internship",
-    title: "Software Engineering Intern — Robotics",
-    company: "Aurora Robotics Lab",
-    location: "Calgary, AB (Hybrid)",
-    deadlineISO: "2025-11-08T23:59:00-07:00",
-  },
-  personal: {
-    name: "Nimna Wijedasa",
-    email: "nimna.wijedasa@ucalgary.ca",
-    phone: "(403) 555-1234",
-    links: {
-      linkedin: "linkedin.com/in/nimna",
-      github: "github.com/nimna",
-      portfolio: "nimna.dev",
-    },
-  },
-  documents: {
-    resume: { name: "Wijedasa_Nimna_Resume.pdf", sizeMB: 0.48 },
-    transcript: { name: "Wijedasa_Nimna_Transcript.pdf", sizeMB: 1.23 },
-    cover: { name: "Cover_Letter_Aurora.pdf", sizeMB: 0.21 },
-    extras: [
-      { name: "robotics_project_report.pdf", sizeMB: 2.1 },
-      { name: "ros2_demo.zip", sizeMB: 6.7 },
-    ],
-  },
-  answers: {
-    why: "I’m excited about shipping production robotics. My experience with ROS2 nodes for vision and control aligns with Aurora’s stack. I value mentorship and weekly demos.",
-    project: "Built a ROS2-based perception pipeline: camera capture → preprocessing → YOLOv8 for object detection → EKF-based tracking. Wrote nodes in Python/C++, used Docker + CI for reproducible builds.",
-  },
-  timeline: [
-    { when: "2025-10-28T12:03:00-06:00", label: "Application submitted" },
-    { when: "2025-10-29T09:12:00-06:00", label: "Status updated to Under Review" },
-  ],
-};
+const EVENTS: Event[] = [
+  { id: "e1", title: "Alumni Coffee Chats — Software", host: "Career Centre", location: "Student Union Hall", when: "Nov 8, 1:00–3:00 PM MT", tags: ["Networking", "SWE"], rsvpUrl: "#" },
+  { id: "e2", title: "Resume Clinic with RBC Data Science", host: "RBC", location: "Room ENG 210", when: "Nov 10, 11:00–1:00 PM MT", tags: ["Resume", "Data"], rsvpUrl: "#" },
+  { id: "e3", title: "Women in Tech Panel", host: "WIT Club", location: "MacHall A", when: "Nov 14, 5:30–7:00 PM MT", tags: ["Panel", "Community"], rsvpUrl: "#" },
+];
 
-// --- Utils ---
-const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+// --- Utility ---
+const unique = <T,>(arr: T[]) => Array.from(new Set(arr));
 
-const fmtTime = (iso: string) =>
-  new Date(iso).toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
+// --- Components ---
+function PeopleListItem({ p, selected, onSelect }: { p: Person; selected: boolean; onSelect: () => void }) {
+  return (
+    <button onClick={onSelect} className={`w-full text-left rounded-xl border p-3 hover:bg-slate-50 transition ${selected ? "bg-slate-50 border-slate-300" : "bg-white"}`}>
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="font-medium leading-tight">{p.name}</div>
+          <div className="text-sm text-muted-foreground">{p.headline}</div>
+        </div>
+        <Badge variant="secondary">{p.classYear}</Badge>
+      </div>
+      <div className="mt-2 text-xs text-muted-foreground flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center gap-1">
+          <GraduationCap className="h-3.5 w-3.5" /> {p.degree}
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <MapPin className="h-3.5 w-3.5" /> {p.location}
+        </span>
+      </div>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {p.skills.slice(0, 3).map((s) => (
+          <Badge key={s} variant="outline" className="rounded-full">
+            {s}
+          </Badge>
+        ))}
+      </div>
+    </button>
+  );
+}
 
-// --- Component ---
-export default function ApplicationDetailCompleted() {
-  const app = useMemo(() => MOCK_APP, []);
-  const [note, setNote] = useState("");
+function PersonDetail({ p }: { p: Person }) {
+  return (
+    <Card className="rounded-2xl h-full">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-semibold leading-tight">{p.name}</h2>
+            <p className="text-sm text-muted-foreground">
+              {p.headline} · {p.degree} {p.classYear}
+            </p>
+            <p className="text-sm text-muted-foreground">
+              <MapPin className="inline h-4 w-4 mr-1" />
+              {p.location}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="secondary" className="gap-2">
+              <MessageSquare className="h-4 w-4" /> Message
+            </Button>
+            <Button className="gap-2" variant="destructive">
+              Request Chat <PhoneCall className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {p.skills.map((s) => (
+            <Badge key={s} className="rounded-full" variant="outline">
+              {s}
+            </Badge>
+          ))}
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <section>
+          <h3 className="font-medium">Willing to help with</h3>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {p.willingTo.map((w) => (
+              <Badge key={w} variant="secondary" className="rounded-full">
+                {w}
+              </Badge>
+            ))}
+          </div>
+        </section>
+        <section>
+          <h3 className="font-medium">Links</h3>
+          <div className="mt-2 flex flex-wrap gap-3 text-sm">
+            {p.links?.linkedin && (
+              <a href={p.links.linkedin} className="inline-flex items-center gap-1 underline">
+                <Linkedin className="h-4 w-4" /> LinkedIn
+              </a>
+            )}
+            {p.links?.website && (
+              <a href={p.links.website} className="inline-flex items-center gap-1 underline">
+                <Globe className="h-4 w-4" /> Website
+              </a>
+            )}
+            {p.links?.email && (
+              <a href={`mailto:${p.links.email}`} className="inline-flex items-center gap-1 underline">
+                <Mail className="h-4 w-4" /> Email
+              </a>
+            )}
+          </div>
+        </section>
+        <section>
+          <h3 className="font-medium">Suggested intro</h3>
+          <p className="text-sm text-muted-foreground mt-1">
+            “Hi {p.name.split(" ")[0]}, I’m a current student interested in {p.skills[0]}. Would you be open to a 15‑minute chat about your path into {p.headline.split("@")[0].trim()}? I can work around your schedule.”
+          </p>
+        </section>
+      </CardContent>
+      <CardFooter className="justify-between">
+        <div className="text-xs text-muted-foreground">Be respectful. Alumni volunteer their time.</div>
+        <Button variant="ghost" className="gap-2">
+          Book via Calendly <ExternalLink className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+function EventCard({ e }: { e: Event }) {
+  return (
+    <Card className="rounded-2xl">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h3 className="text-lg font-semibold leading-tight">{e.title}</h3>
+            <p className="text-sm text-muted-foreground">Hosted by {e.host}</p>
+          </div>
+          <Badge variant="secondary">Upcoming</Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="text-sm text-muted-foreground">
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="inline-flex items-center gap-1">
+            <Calendar className="h-4 w-4" />
+            {e.when}
+          </span>
+          <span className="inline-flex items-center gap-1">
+            <MapPin className="h-4 w-4" />
+            {e.location}
+          </span>
+        </div>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {e.tags.map((t) => (
+            <Badge key={t} variant="outline" className="rounded-full">
+              {t}
+            </Badge>
+          ))}
+        </div>
+      </CardContent>
+      <CardFooter>
+        <Button className="gap-2 w-full" variant="destructive">
+          RSVP <ChevronRight className="h-4 w-4" />
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+}
+
+export default function NetworkingPage() {
+  const [query, setQuery] = useState("");
+  const [onlyMentors, setOnlyMentors] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(PEOPLE[0]?.id ?? null);
+
+  const facets = useMemo(() => {
+    const skills = unique(PEOPLE.flatMap((p) => p.skills)).sort();
+    const locations = unique(PEOPLE.map((p) => p.location));
+    const years = unique(PEOPLE.map((p) => p.classYear));
+    return { skills, locations, years };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase();
+    return PEOPLE.filter((p) => {
+      const base = [p.name, p.headline, p.degree, p.location, p.skills.join(" "), p.willingTo.join(" ")].join(" ").toLowerCase();
+      const passMentor = !onlyMentors || p.willingTo.includes("Mentor");
+      return base.includes(q) && passMentor;
+    });
+  }, [query, onlyMentors]);
+
+  const selected = useMemo(() => filtered.find((x) => x.id === selectedId) ?? filtered[0] ?? null, [filtered, selectedId]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
-      {/* Header */}
+      {/* Top bar */}
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="gap-2" onClick={() => (window.location.href = "/applications")}>
-              <ArrowLeft className="h-4 w-4" /> Back to Applications
-            </Button>
+            <Users2 className="h-5 w-5" />
+            <span className="font-semibold">Networking</span>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className={`rounded-full ${STATUS_STYLES[app.status]}`}>{app.status}</Badge>
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => window.print()}>
-              <Printer className="h-4 w-4" /> Print
-            </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Share2 className="h-4 w-4" /> Share
-            </Button>
-            <Button variant="destructive" size="sm" className="gap-2" onClick={() => alert("Exported as PDF (mock)")}>
-              <Download className="h-4 w-4" /> Export PDF
+            <div className="relative w-[min(60vw,460px)]">
+              <Input aria-label="Search people" placeholder="Search alumni, mentors, skills, companies…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 pl-9" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            </div>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => setOnlyMentors((v) => !v)}>
+              <Star className="h-4 w-4" /> Mentors {onlyMentors ? "✓" : ""}
             </Button>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 grid gap-6 lg:grid-cols-12">
-        {/* Left column: details */}
-        <section className="lg:col-span-8 space-y-6">
-          {/* Job summary */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h1 className="text-xl font-semibold">{app.job.title}</h1>
-                  <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-2 mt-1">
-                    <span className="inline-flex items-center gap-1">
-                      <Building2 className="h-4 w-4" /> {app.job.company}
-                    </span>
-                    <span>•</span>
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-4 w-4" /> {app.job.location}
-                    </span>
-                  </p>
-                </div>
-                <div className="text-right min-w-[220px]">
-                  <div className="text-xs text-muted-foreground">Submitted</div>
-                  <div className="font-medium">
-                    {fmtDate(app.submittedISO)} · {fmtTime(app.submittedISO)}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">Last updated</div>
-                  <div className="text-sm">{fmtDate(app.updatedISO)}</div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <p>Thanks for applying! Below are the files and responses you submitted. We’ll email you about next steps. You can track changes to your status on this page.</p>
-            </CardContent>
-            <CardFooter className="justify-end gap-2">
-              <Button variant="secondary" className="gap-2" onClick={() => (window.location.href = "/jobs/aurora-robotics-lab")}>
-                View Job <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/apply/aurora-robotics-lab")}>
-                Apply Again <ChevronRight className="h-4 w-4" />
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Documents */}
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <h2 className="text-lg font-semibold">Submitted documents</h2>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm">
-              {/* Resume */}
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border">
-                <div className="inline-flex items-center gap-2">
-                  <FileText className="h-4 w-4" /> Resume
-                </div>
-                <div className="text-muted-foreground">
-                  {app.documents.resume.name} · {app.documents.resume.sizeMB.toFixed(2)} MB
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="secondary" className="gap-2">
-                    <FileDown className="h-4 w-4" /> Download
-                  </Button>
-                  <Button size="sm" variant="ghost" className="gap-2">
-                    <ExternalLink className="h-4 w-4" /> Open
-                  </Button>
-                </div>
-              </div>
-
-              {/* Transcript */}
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border">
-                <div className="inline-flex items-center gap-2">
-                  <FileText className="h-4 w-4" /> Transcript
-                </div>
-                <div className="text-muted-foreground">
-                  {app.documents.transcript.name} · {app.documents.transcript.sizeMB.toFixed(2)} MB
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="secondary" className="gap-2">
-                    <FileDown className="h-4 w-4" /> Download
-                  </Button>
-                  <Button size="sm" variant="ghost" className="gap-2">
-                    <ExternalLink className="h-4 w-4" /> Open
-                  </Button>
-                </div>
-              </div>
-
-              {/* Cover letter */}
-              {app.documents.cover && (
-                <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border">
-                  <div className="inline-flex items-center gap-2">
-                    <FileText className="h-4 w-4" /> Cover letter
-                  </div>
-                  <div className="text-muted-foreground">
-                    {app.documents.cover.name} · {app.documents.cover.sizeMB.toFixed(2)} MB
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="secondary" className="gap-2">
-                      <FileDown className="h-4 w-4" /> Download
-                    </Button>
-                    <Button size="sm" variant="ghost" className="gap-2">
-                      <ExternalLink className="h-4 w-4" /> Open
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Extras */}
-              {app.documents.extras.length > 0 && (
-                <div className="p-3 rounded-xl border">
-                  <div className="text-sm font-medium mb-2">Supporting materials</div>
-                  <div className="grid gap-2">
-                    {app.documents.extras.map((f) => (
-                      <div key={f.name} className="flex items-center justify-between gap-2 text-sm">
-                        <span className="inline-flex items-center gap-2">
-                          <Paperclip className="h-4 w-4" />
-                          {f.name}
-                        </span>
-                        <span className="text-muted-foreground">{f.sizeMB.toFixed(2)} MB</span>
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" variant="secondary" className="gap-2">
-                            <FileDown className="h-4 w-4" /> Download
-                          </Button>
-                          <Button size="sm" variant="ghost" className="gap-2">
-                            <ExternalLink className="h-4 w-4" /> Open
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Answers */}
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <h2 className="text-lg font-semibold">Responses</h2>
-            </CardHeader>
-            <CardContent className="grid gap-4 text-sm text-muted-foreground">
-              <div>
-                <div className="text-xs font-medium text-foreground mb-1">Why Aurora?</div>
-                <p className="whitespace-pre-wrap">{app.answers.why}</p>
-              </div>
-              <div>
-                <div className="text-xs font-medium text-foreground mb-1">Robotics/AI project</div>
-                <p className="whitespace-pre-wrap">{app.answers.project}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Notes (personal) */}
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <h2 className="text-lg font-semibold">Your notes</h2>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground mb-2">Private notes only you can see (e.g., interview prep reminders).</div>
-              <div className="flex items-center gap-2">
-                <Input placeholder="Add a short note…" value={note} onChange={(e) => setNote(e.target.value)} />
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    if (note.trim()) {
-                      alert("Saved (mock)");
-                      setNote("");
-                    }
-                  }}>
-                  Save
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-
-        {/* Right column: timeline & actions */}
-        <aside className="lg:col-span-4 space-y-4">
-          {/* Timeline */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <h3 className="text-sm font-semibold">Status timeline</h3>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              {app.timeline.map((t) => (
-                <div key={t.when} className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5" />
-                  <div>
-                    <div className="text-foreground">{t.label}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {fmtDate(t.when)} · {fmtTime(t.when)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Next steps */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <h3 className="text-sm font-semibold">Next steps</h3>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-2">
-              <div>We’ll email you if you move to a technical screen. Typical SLA: 1–2 weeks.</div>
-              <div className="text-xs">Tip: Prep algorithms + ROS basics and collect 2 project talking points.</div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-2">
-              <Button variant="secondary" className="W-full gap-2" onClick={() => alert("Message sent (mock)")}>
-                <MessageSquare className="h-4 w-4" /> Message recruiter
-              </Button>
-              <Button variant="ghost" className="w-full gap-2 text-rose-600 hover:text-rose-700" onClick={() => confirm("Withdraw this application?") && alert("Application withdrawn (mock)")}>
-                <XCircle className="h-4 w-4" /> Withdraw application
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Contact */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <h3 className="text-sm font-semibold">Contact</h3>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-2">
-              <div className="flex items-center gap-2">
-                <User2 className="h-4 w-4" /> Recruiting Team
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" /> careers@aurora-robotics.example
-              </div>
-              <div className="flex items-center gap-2">
-                <LinkIcon className="h-4 w-4" />{" "}
-                <a className="underline" href="/jobs/aurora-robotics-lab">
-                  Job posting
+      {/* Layout */}
+      <main className="mx-auto max-w-7xl px-4 py-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+        {/* Left column: people directory */}
+        <aside className="lg:col-span-5 xl:col-span-4">
+          <Card className="rounded-2xl h-[calc(100vh-160px)] overflow-hidden">
+            <CardHeader className="py-3">
+              <div className="flex items-center justify-between">
+                <h2 className="text-sm font-semibold">
+                  {filtered.length} connection{filtered.length !== 1 ? "s" : ""}
+                </h2>
+                <a className="text-xs text-primary inline-flex items-center gap-1" href="#">
+                  Advanced filters <Filter className="h-3.5 w-3.5" />
                 </a>
               </div>
+            </CardHeader>
+            <CardContent className="p-3 pt-0 overflow-y-auto h-full space-y-3">
+              {filtered.map((p) => (
+                <PeopleListItem key={p.id} p={p} selected={selected?.id === p.id} onSelect={() => setSelectedId(p.id)} />
+              ))}
+              {filtered.length === 0 && <div className="text-sm text-muted-foreground p-6 text-center">No matches.</div>}
             </CardContent>
           </Card>
         </aside>
+
+        {/* Right column: selected person + events */}
+        <section className="lg:col-span-7 xl:col-span-8 space-y-4">
+          {selected ? (
+            <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+              <PersonDetail p={selected} />
+            </motion.div>
+          ) : (
+            <Card className="rounded-2xl">
+              <CardContent className="py-12 text-center text-muted-foreground">Choose a person to view details.</CardContent>
+            </Card>
+          )}
+
+          {/* Events rail */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold">Upcoming events</h3>
+              <a className="text-xs text-primary inline-flex items-center gap-1" href="#">
+                See all <ChevronRight className="h-3.5 w-3.5" />
+              </a>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {EVENTS.map((e) => (
+                <EventCard key={e.id} e={e} />
+              ))}
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className="border-t bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted-foreground">This view mirrors what you submitted. Keep an eye on your email for updates.</div>
+        <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground">Tip: Be specific in your outreach — mention a shared class, club, or interest.</div>
       </footer>
     </div>
   );

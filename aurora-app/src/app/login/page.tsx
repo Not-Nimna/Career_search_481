@@ -1,163 +1,158 @@
 "use client";
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
-import React from "react";
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { Briefcase, Calendar, BookOpen, ClipboardList, Rocket, GraduationCap } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+const LoginPage: React.FC = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
-export default function HomePage() {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!email || !password) {
+      setError("Please enter both your UCalgary email and password.");
+      return;
+    }
+
+    if (!email.toLowerCase().endsWith("@ucalgary.ca")) {
+      setError("Please sign in using your @ucalgary.ca email address.");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      // TODO: replace with real auth call
+      console.log({ email, password, rememberMe });
+      // naviagegate to dashboard or home page upon success
+      router.push("/home");
+
+      // e.g. await signIn("credentials", { redirect: true, email, password });
+    } catch (err) {
+      setError("Something went wrong while signing you in. Please try again.");
+      console.error("Login error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black text-white">
-      {/* Glow background */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -bottom-32 left-1/2 h-96 w-[700px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_top,_#ff6961,_transparent_60%)] opacity-60 blur-3xl" />
-        <div className="absolute -top-64 left-0 h-96 w-96 rounded-full bg-[radial-gradient(circle_at_center,_#a855f7,_transparent_60%)] opacity-40 blur-3xl" />
-        <div className="absolute -top-32 right-0 h-72 w-72 rounded-full bg-[radial-gradient(circle_at_center,_#22d3ee,_transparent_60%)] opacity-40 blur-3xl" />
-      </div>
-
-      {/* Top nav */}
-      <header className="relative z-20 border-b border-white/5 bg-black/70 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#ff6961] text-xs font-bold tracking-[0.12em]">UC</div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold">Career Canvas</span>
-              <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-400">UCalgary Students</span>
-            </div>
-          </div>
-
-          <nav className="hidden items-center gap-8 text-xs text-zinc-300 md:flex">
-            <Link href="/jobSearch" className="hover:text-white">
-              Job search
-            </Link>
-            <Link href="/deadlines" className="hover:text-white">
-              Deadlines
-            </Link>
-            <Link href="/resources" className="hover:text-white">
-              Resources
-            </Link>
-            <Link href="/applications" className="hover:text-white">
-              Applications
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" className="border-white/20 bg-transparent text-xs text-zinc-100 hover:bg-white/10">
-              Log in
-            </Button>
-            <Button asChild size="sm" className="bg-[#ff6961] text-xs font-semibold text-black hover:bg-[#ff4b43]">
-              <Link href="/jobSearch">Open career search</Link>
-            </Button>
-          </div>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-red-900 via-red-800 to-red-700 text-slate-900">
+      {/* Top grey bar with logo */}
+      <header className="w-full bg-neutral-100 border-b border-neutral-200 px-4 sm:px-8 py-3 flex items-center justify-between" aria-label="University of Calgary">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-12 bg-yellow-500 rounded-sm shadow-sm border border-black/20" aria-hidden="true" />
+          <span className="text-xs font-semibold leading-tight tracking-[0.18em] text-neutral-900 uppercase">
+            University of
+            <br />
+            Calgary
+          </span>
         </div>
+        <span className="hidden sm:inline text-xs text-neutral-500">Student Career Search</span>
       </header>
 
-      {/* Hero */}
-      <main className="relative z-20 mx-auto flex max-w-6xl flex-col items-center px-4 pt-16 pb-24 text-center">
-        {/* Floating canvas frame */}
-        <motion.div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] text-zinc-300" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-          <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#ff6961] text-[10px] font-bold text-black">●</span>
-          Built for UCalgary internship, co-op, and new-grad recruiting.
-        </motion.div>
+      {/* Body */}
+      <main className="flex-1 flex items-center justify-center px-4 py-10">
+        <section className="w-full max-w-md bg-white/95 shadow-2xl rounded-2xl border border-red-900/10 px-6 sm:px-8 py-8 space-y-6 backdrop-blur" aria-labelledby="login-title" aria-describedby="login-subtitle">
+          {/* Card header */}
+          <header className="space-y-2">
+            <h1 id="login-title" className="text-xl sm:text-2xl font-bold text-neutral-900">
+              Student Career Search Login
+            </h1>
+            <p id="login-subtitle" className="text-sm text-neutral-600">
+              Sign in with your UCalgary email to access internships, co-ops, and entry-level opportunities.
+            </p>
+          </header>
 
-        <motion.h1 className="max-w-4xl text-balance text-5xl font-semibold leading-[1.02] tracking-tight md:text-6xl" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.05 }}>
-          Your career search
-          <span className="block text-[#ff6961]">is the canvas.</span>
-        </motion.h1>
-
-        <motion.p className="mt-5 max-w-2xl text-sm text-zinc-300 md:text-base" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.12 }}>
-          Design your recruiting season from end-to-end. Search curated roles, track deadlines, organize applications, and keep all your UCalgary career resources in one place.
-        </motion.p>
-
-        {/* CTAs */}
-        <motion.div className="mt-8 flex flex-wrap items-center justify-center gap-3" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.18 }}>
-          <Button asChild size="lg" className="gap-2 rounded-full bg-[#ff6961] px-6 text-sm font-semibold text-black shadow-[0_0_40px_rgba(248,113,113,0.5)] hover:bg-[#ff4b43]">
-            <Link href="/jobSearch">
-              <Rocket className="h-4 w-4" />
-              Start searching roles
-            </Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="gap-2 rounded-full border-white/25 bg-transparent px-6 text-sm text-zinc-100 hover:bg-white/10">
-            <Link href="/deadlines">
-              <Calendar className="h-4 w-4" />
-              See this week’s deadlines
-            </Link>
-          </Button>
-        </motion.div>
-
-        {/* Small sub-footnote under hero */}
-        <motion.div className="mt-4 text-[11px] text-zinc-400" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25, duration: 0.7 }}>
-          Designed as a companion to Elevate / official job boards — this is your personal control centre.
-        </motion.div>
-
-        {/* Floating cards / logos */}
-        <div className="pointer-events-none relative mt-16 h-64 w-full max-w-5xl">
-          {/* Job card */}
-          <motion.div className="absolute left-4 top-2 w-64" initial={{ y: 20, opacity: 0, rotate: -6 }} animate={{ y: 0, opacity: 1, rotate: -6 }} transition={{ duration: 0.7, delay: 0.25 }}>
-            <Card className="border-white/10 bg-white/5 text-left text-xs text-zinc-100 backdrop-blur">
-              <CardContent className="space-y-2 p-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] uppercase tracking-[0.18em] text-zinc-400">Match found</span>
-                  <span className="rounded-full bg-emerald-500/20 px-2 py-[2px] text-[10px] text-emerald-300">SWE · Co-op</span>
-                </div>
-                <div className="text-sm font-semibold">Software Engineering Intern</div>
-                <div className="text-[11px] text-zinc-400">Aurora Robotics Lab · Calgary · Hybrid</div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Deadlines card */}
-          <motion.div className="absolute right-6 top-10 w-56" initial={{ y: 20, opacity: 0, rotate: 7 }} animate={{ y: 0, opacity: 1, rotate: 7 }} transition={{ duration: 0.7, delay: 0.3 }}>
-            <Card className="border-white/10 bg-black/60 text-left text-xs text-zinc-100 backdrop-blur">
-              <CardContent className="space-y-2 p-3">
-                <div className="flex items-center justify-between">
-                  <span className="inline-flex items-center gap-1 text-[11px] text-zinc-300">
-                    <Calendar className="h-3 w-3" /> This week
-                  </span>
-                  <span className="text-[11px] text-amber-300">2 deadlines</span>
-                </div>
-                <div className="h-px w-full bg-gradient-to-r from-transparent via-white/40 to-transparent" />
-                <div className="space-y-1 text-[11px] text-zinc-300">
-                  <div>RBC · Data Science – Nov 12</div>
-                  <div>Women in Tech Panel – Nov 14</div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Resources pill */}
-          <motion.div className="absolute left-1/2 top-40 w-52 -translate-x-1/2" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.7, delay: 0.35 }}>
-            <Card className="border-white/10 bg-white/5 text-xs text-zinc-100 backdrop-blur">
-              <CardContent className="flex items-center gap-3 p-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sky-500/20">
-                  <BookOpen className="h-4 w-4 text-sky-300" />
-                </div>
-                <div>
-                  <div className="font-medium">ATS-proof resume lab</div>
-                  <div className="text-[11px] text-zinc-400">Today · 2:00–3:30 PM · ENG 214</div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Bottom badges */}
-          <motion.div className="absolute bottom-0 left-6 flex items-center gap-2 text-[11px] text-zinc-400" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4, duration: 0.7 }}>
-            <div className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-[3px]">
-              <GraduationCap className="h-3 w-3" />
-              UCalgary Engineering / CS
+          {/* Error message */}
+          {error && (
+            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700" role="alert">
+              {error}
             </div>
-          </motion.div>
+          )}
 
-          <motion.div className="absolute bottom-0 right-6 flex items-center gap-2 text-[11px] text-zinc-400" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.45, duration: 0.7 }}>
-            <div className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-[3px]">
-              <Briefcase className="h-3 w-3" />
-              Internships · Co-ops · New-grad
+          <form className="space-y-5" onSubmit={handleSubmit} noValidate>
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-neutral-800" htmlFor="email">
+                UCalgary Email*
+              </label>
+              <div className="flex items-center gap-2 rounded-md border border-neutral-300 bg-white px-3 py-2 focus-within:ring-2 focus-within:ring-red-500 focus-within:ring-offset-1 focus-within:ring-offset-white">
+                <div className="text-lg" aria-hidden="true">
+                  👤
+                </div>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="firstname.lastname@ucalgary.ca"
+                  className="w-full border-none bg-transparent text-sm outline-none placeholder:text-neutral-400"
+                  required
+                />
+              </div>
             </div>
-          </motion.div>
-        </div>
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-neutral-800" htmlFor="password">
+                Password*
+              </label>
+              <div className="flex items-center gap-2 rounded-md border border-neutral-300 bg-white px-3 py-2 focus-within:ring-2 focus-within:ring-red-500 focus-within:ring-offset-1 focus-within:ring-offset-white">
+                <div className="text-lg" aria-hidden="true">
+                  🔒
+                </div>
+                <input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  className="w-full border-none bg-transparent text-sm outline-none placeholder:text-neutral-400"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Remember + forgot */}
+            <div className="flex items-center justify-between gap-3 text-sm">
+              <label className="inline-flex items-center gap-2 text-neutral-700">
+                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="h-4 w-4 rounded border-neutral-300 text-red-600 focus:ring-red-500" />
+                <span>Remember me on this device</span>
+              </label>
+
+              <button type="button" className="text-sm font-medium text-red-700 hover:text-red-800 hover:underline" onClick={() => alert("Forgot password flow goes here")}>
+                Forgot password?
+              </button>
+            </div>
+
+            {/* Login button */}
+            <button
+              type="submit"
+              className="mt-2 inline-flex w-full items-center justify-center rounded-md bg-red-700 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-red-900/20 hover:bg-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600 disabled:opacity-60 disabled:cursor-not-allowed"
+              disabled={isSubmitting}>
+              {isSubmitting ? "Signing you in..." : "Log In"}
+            </button>
+
+            {/* Footer helper text */}
+            <p className="text-xs text-neutral-500 text-center">
+              Having trouble signing in?{" "}
+              <a href="#" className="font-medium text-red-700 hover:text-red-800 hover:underline">
+                Contact IT support
+              </a>
+              .
+            </p>
+          </form>
+        </section>
       </main>
     </div>
   );
-}
+};
+
+export default LoginPage;
