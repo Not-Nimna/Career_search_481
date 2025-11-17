@@ -2,12 +2,13 @@
 
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Building2, Calendar, User2, Mail, Phone, Globe, Github, Linkedin, Upload, FileText, FileBadge, X, Check, AlertTriangle, BadgeCheck, ArrowRight } from "lucide-react";
+import { Building2, Calendar, User2, Mail, Phone, Globe, Github, Linkedin, Upload, FileText, FileBadge, X, ExternalLink, Check, AlertTriangle, BadgeCheck, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 // ---- Config / Prefill ----
 const PREFILL = {
@@ -125,16 +126,19 @@ export default function AuroraSinglePageApply() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Sticky header */}
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            <span className="font-semibold">
-              Apply — {job.title} · {job.company}
-            </span>
+            <Link href="/home" className="inline-flex items-center gap-2">
+              <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
+              <span className="font-semibold">University Career Hub</span>
+            </Link>
           </div>
-          <Badge variant="secondary" className="rounded-full">
-            Deadline {job.deadline}
-          </Badge>
+
+          <Link href="/profile">
+            <Button variant="destructive" size="sm" className="gap-2">
+              <ExternalLink className="h-4 w-4" /> Profile
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -518,7 +522,12 @@ export default function AuroraSinglePageApply() {
 
         {/* Right: sticky progress */}
         <aside className="lg:col-span-4">
-          <Card className="rounded-2xl sticky top-[84px]">
+          <Link href="/jobdetails">
+            <Button variant="outline" className="gap-2">
+              ← Back to Application
+            </Button>
+          </Link>
+          <Card className="rounded-2xl mt-4">
             <CardHeader className="pb-2">
               <div className="font-semibold">Progress</div>
               <p className="text-xs text-muted-foreground">Scroll or jump to sections.</p>

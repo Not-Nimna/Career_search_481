@@ -1,11 +1,13 @@
 "use client";
+
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { BookOpen, GraduationCap, Mic2, Users, Wrench, FileText, Calendar, Clock, Search, Filter, ExternalLink, Bookmark, BookmarkCheck, ChevronRight, PlayCircle } from "lucide-react";
+import { BookOpen, GraduationCap, Mic2, Users, Wrench, FileText, Calendar, Clock, Search, Filter, ExternalLink, Bookmark, BookmarkCheck, ChevronRight, PlayCircle, X } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 // --- Types ---
 export type Resource = {
@@ -20,6 +22,7 @@ export type Resource = {
   blurb: string;
   href?: string;
 };
+
 type KindFilter = "All" | Resource["kind"];
 
 const KIND_OPTIONS: KindFilter[] = ["All", "Seminar", "Workshop", "Toolkit", "Guide", "Webinar", "Panel", "Video Series"];
@@ -28,14 +31,14 @@ const KIND_OPTIONS: KindFilter[] = ["All", "Seminar", "Workshop", "Toolkit", "Gu
 const RESOURCES: Resource[] = [
   {
     id: "r1",
-    title: "ATS‑Proof Resume Lab",
+    title: "ATS-Proof Resume Lab",
     kind: "Workshop",
     host: "Career Centre",
     location: "ENG 214",
     date: "Nov 9, 2:00–3:30 PM",
     duration: "90m",
     tags: ["Resume", "ATS", "Templates"],
-    blurb: "Hands‑on session to transform your resume into an ATS‑friendly, impact‑driven document.",
+    blurb: "Hands-on session to transform your resume into an ATS-friendly, impact-driven document.",
     href: "#",
   },
   {
@@ -84,7 +87,16 @@ const RESOURCES: Resource[] = [
     blurb: "Meet data scientists and ask about projects, stacks, and pathways.",
     href: "#",
   },
-  { id: "r6", title: "Cover Letter in 30 Minutes", kind: "Guide", host: "Career Centre", location: "Article", tags: ["Cover Letter", "Writing"], blurb: "A pragmatic template and examples for different roles (SWE, Data, Product).", href: "#" },
+  {
+    id: "r6",
+    title: "Cover Letter in 30 Minutes",
+    kind: "Guide",
+    host: "Career Centre",
+    location: "Article",
+    tags: ["Cover Letter", "Writing"],
+    blurb: "A pragmatic template and examples for different roles (SWE, Data, Product).",
+    href: "#",
+  },
   {
     id: "r7",
     title: "Mock Interview Night",
@@ -104,12 +116,12 @@ const RESOURCES: Resource[] = [
     host: "Career Centre",
     location: "Playlist",
     tags: ["Strategy", "Planning"],
-    blurb: "Short, binge‑able videos: goal setting, targeting roles, footprint building.",
+    blurb: "Short, binge-able videos: goal setting, targeting roles, footprint building.",
     href: "#",
   },
   {
     id: "r9",
-    title: "LinkedIn Profile Tear‑Downs",
+    title: "LinkedIn Profile Tear-Downs",
     kind: "Seminar",
     host: "Alumni Office",
     location: "Online",
@@ -119,7 +131,16 @@ const RESOURCES: Resource[] = [
     blurb: "Live review of student profiles with actionable feedback.",
     href: "#",
   },
-  { id: "r10", title: "Negotiation Basics for Interns", kind: "Guide", host: "Career Centre", location: "Article", tags: ["Offer", "Negotiation"], blurb: "Scripts and principles for discussing compensation respectfully.", href: "#" },
+  {
+    id: "r10",
+    title: "Negotiation Basics for Interns",
+    kind: "Guide",
+    host: "Career Centre",
+    location: "Article",
+    tags: ["Offer", "Negotiation"],
+    blurb: "Scripts and principles for discussing compensation respectfully.",
+    href: "#",
+  },
 ];
 
 const KIND_COLORS: Record<Resource["kind"], string> = {
@@ -132,10 +153,18 @@ const KIND_COLORS: Record<Resource["kind"], string> = {
   "Video Series": "bg-indigo-100 text-indigo-900",
 };
 
-function ResourceCard({ r, saved, onSave }: { r: Resource; saved: boolean; onSave: () => void }) {
+type ResourceCardProps = {
+  r: Resource;
+  saved: boolean;
+  scheduled?: boolean;
+  onSave: () => void;
+  onOpen: () => void;
+};
+
+function ResourceCard({ r, saved, scheduled, onSave, onOpen }: ResourceCardProps) {
   return (
     <motion.div layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className="rounded-2xl h-full">
+      <Card className="rounded-2xl h-full cursor-pointer transition hover:shadow-lg hover:-translate-y-0.5" onClick={onOpen} role="button">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -144,7 +173,15 @@ function ResourceCard({ r, saved, onSave }: { r: Resource; saved: boolean; onSav
                 {r.host} · {r.location}
               </p>
             </div>
-            <Badge className={`rounded-full text-xs ${KIND_COLORS[r.kind]}`}>{r.kind}</Badge>
+            <div className="flex flex-col items-end gap-2">
+              <Badge className={`rounded-full text-xs ${KIND_COLORS[r.kind]}`}>{r.kind}</Badge>
+              {scheduled && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 text-emerald-900 px-2 py-0.5 text-[11px]">
+                  <Calendar className="h-3 w-3" />
+                  Scheduled
+                </span>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -172,11 +209,23 @@ function ResourceCard({ r, saved, onSave }: { r: Resource; saved: boolean; onSav
           </div>
         </CardContent>
         <CardFooter className="flex items-center justify-between">
-          <Button variant="secondary" className="gap-2" onClick={onSave}>
+          <Button
+            variant="secondary"
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSave();
+            }}>
             {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
             {saved ? "Saved" : "Save"}
           </Button>
-          <Button variant="destructive" className="gap-2">
+          <Button
+            variant="destructive"
+            className="gap-2"
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen();
+            }}>
             Open <ExternalLink className="h-4 w-4" />
           </Button>
         </CardFooter>
@@ -185,16 +234,106 @@ function ResourceCard({ r, saved, onSave }: { r: Resource; saved: boolean; onSav
   );
 }
 
+type ResourceModalProps = {
+  resource: Resource | null;
+  open: boolean;
+  saved: boolean;
+  scheduled: boolean;
+  onClose: () => void;
+  onToggleSave: () => void;
+  onToggleSchedule: () => void;
+};
+
+function ResourceModal({ resource, open, saved, scheduled, onClose, onToggleSave, onToggleSchedule }: ResourceModalProps) {
+  if (!open || !resource) return null;
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+      {/* click outside to close */}
+      <div className="absolute inset-0" onClick={onClose} />
+      <motion.div initial={{ opacity: 0, scale: 0.97, y: 12 }} animate={{ opacity: 1, scale: 1, y: 0 }} transition={{ duration: 0.18 }} className="relative z-50 w-full max-w-xl">
+        <Card className="rounded-3xl shadow-2xl border-slate-200 bg-white">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-semibold leading-snug">{resource.title}</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {resource.host} · {resource.location}
+                </p>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                  {resource.date && (
+                    <span className="inline-flex items-center gap-1">
+                      <Calendar className="h-4 w-4" />
+                      {resource.date}
+                    </span>
+                  )}
+                  {resource.duration && (
+                    <span className="inline-flex items-center gap-1">
+                      <Clock className="h-4 w-4" />
+                      {resource.duration}
+                    </span>
+                  )}
+                  <Badge className={`rounded-full text-xs ${KIND_COLORS[resource.kind]}`}>{resource.kind}</Badge>
+                </div>
+              </div>
+              <button onClick={onClose} className="rounded-full border bg-white p-1.5 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-slate-700">{resource.blurb}</p>
+            <div className="flex flex-wrap gap-2">
+              {resource.tags.map((t) => (
+                <Badge key={t} variant="outline" className="rounded-full text-xs">
+                  {t}
+                </Badge>
+              ))}
+            </div>
+
+            {/* Scheduling section */}
+            <div className="mt-4 rounded-2xl border bg-slate-50 px-4 py-3 flex flex-col gap-2">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-medium">Add this to your schedule</p>
+                  <p className="text-xs text-muted-foreground">Mark it as scheduled to keep track of events you plan to attend.</p>
+                </div>
+                <Button size="sm" variant={scheduled ? "destructive" : "default"} className="gap-2" onClick={onToggleSchedule}>
+                  <Calendar className="h-4 w-4" />
+                  {scheduled ? "Scheduled" : "Add to schedule"}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+          <CardFooter className="flex items-center justify-between gap-3">
+            <Button variant="secondary" className="gap-2" onClick={onToggleSave}>
+              {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
+              {saved ? "Saved" : "Save resource"}
+            </Button>
+            {resource.href && (
+              <a href={resource.href} target="_blank" rel="noreferrer">
+                <Button variant="outline" className="gap-2">
+                  Open link <ExternalLink className="h-4 w-4" />
+                </Button>
+              </a>
+            )}
+          </CardFooter>
+        </Card>
+      </motion.div>
+    </div>
+  );
+}
+
 export default function ResourcesPage() {
-  type KindFilter = (typeof KIND_OPTIONS)[number];
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<KindFilter>("All");
   const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [scheduled, setScheduled] = useState<Record<string, boolean>>({});
+  const [tagFilter, setTagFilter] = useState<string | null>(null);
+  const [activeResource, setActiveResource] = useState<Resource | null>(null);
 
   const allKinds = useMemo<KindFilter[]>(() => KIND_OPTIONS, []);
   const allTags = useMemo(() => Array.from(new Set(RESOURCES.flatMap((r) => r.tags))).sort(), []);
-
-  const [tagFilter, setTagFilter] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
@@ -211,11 +350,25 @@ export default function ResourcesPage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5" />
-            <span className="font-semibold">Career Resources</span>
+            <Link href="/home" className="inline-flex items-center gap-2">
+              <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
+              <span className="font-semibold">University Career Hub</span>
+            </Link>
           </div>
+
+          <Link href="/profile">
+            <Button variant="destructive" size="sm" className="gap-2">
+              <ExternalLink className="h-4 w-4" /> Profile
+            </Button>
+          </Link>
+        </div>
+      </header>
+
+      <main className="mx-auto max-w-7xl px-4 py-6 space-y-8">
+        {/* Filters */}
+        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative w-[min(60vw,480px)]">
               <Input placeholder="Search seminars, workshops, guides…" className="h-10 pl-9" value={query} onChange={(e) => setQuery(e.target.value)} />
@@ -234,10 +387,7 @@ export default function ResourcesPage() {
             </Button>
           </div>
         </div>
-      </header>
 
-      <main className="mx-auto max-w-7xl px-4 py-6 space-y-8">
-        {/* Filters */}
         <section>
           <div className="flex flex-wrap gap-3 items-center">
             {/* Kind selector */}
@@ -247,8 +397,8 @@ export default function ResourcesPage() {
                 {allKinds.map((k) => (
                   <button
                     key={k}
-                    onClick={() => setTypeFilter(k)} // k is string, but setTypeFilter expects Resource["kind"] | "All"
-                  >
+                    onClick={() => setTypeFilter(k)}
+                    className={`px-2.5 py-1 rounded-full border text-sm transition ${typeFilter === k ? "bg-[#FF6961] text-black border-transparent hover:bg-[#e85a54]" : "bg-white text-slate-700 hover:bg-slate-50"}`}>
                     {k}
                   </button>
                 ))}
@@ -262,7 +412,7 @@ export default function ResourcesPage() {
                   <button
                     key={t}
                     onClick={() => setTagFilter(t === "All" ? null : t)}
-                    className={`px-2.5 py-1 rounded-full border text-sm ${(tagFilter ?? "All") === t ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white"}`}>
+                    className={`px-2.5 py-1 rounded-full border text-sm ${(tagFilter ?? "All") === t ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white text-slate-700 hover:bg-slate-50"}`}>
                     {t}
                   </button>
                 ))}
@@ -281,7 +431,19 @@ export default function ResourcesPage() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.slice(0, 3).map((r) => (
-              <ResourceCard key={r.id} r={r} saved={!!saved[r.id]} onSave={() => setSaved((s) => ({ ...s, [r.id]: !s[r.id] }))} />
+              <ResourceCard
+                key={r.id}
+                r={r}
+                saved={!!saved[r.id]}
+                scheduled={!!scheduled[r.id]}
+                onSave={() =>
+                  setSaved((s) => ({
+                    ...s,
+                    [r.id]: !s[r.id],
+                  }))
+                }
+                onOpen={() => setActiveResource(r)}
+              />
             ))}
           </div>
         </section>
@@ -296,7 +458,19 @@ export default function ResourcesPage() {
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((r) => (
-              <ResourceCard key={r.id} r={r} saved={!!saved[r.id]} onSave={() => setSaved((s) => ({ ...s, [r.id]: !s[r.id] }))} />
+              <ResourceCard
+                key={r.id}
+                r={r}
+                saved={!!saved[r.id]}
+                scheduled={!!scheduled[r.id]}
+                onSave={() =>
+                  setSaved((s) => ({
+                    ...s,
+                    [r.id]: !s[r.id],
+                  }))
+                }
+                onOpen={() => setActiveResource(r)}
+              />
             ))}
             {filtered.length === 0 && (
               <Card className="rounded-2xl col-span-full">
@@ -323,7 +497,7 @@ export default function ResourcesPage() {
             <CardContent className="py-6 flex items-center justify-between gap-4">
               <div>
                 <h3 className="text-lg font-semibold">Watch: Career Strategy Series</h3>
-                <p className="text-sm text-muted-foreground mt-1">Bite‑sized videos to level up your plan.</p>
+                <p className="text-sm text-muted-foreground mt-1">Bite-sized videos to level up your plan.</p>
               </div>
               <Button variant="secondary" className="gap-2">
                 <PlayCircle className="h-4 w-4" /> Start
@@ -336,6 +510,29 @@ export default function ResourcesPage() {
       <footer className="border-t bg-white">
         <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground">New resources drop weekly. Check back often or save your favorites.</div>
       </footer>
+
+      {/* Modal on top with blurred background */}
+      <ResourceModal
+        resource={activeResource}
+        open={!!activeResource}
+        saved={activeResource ? !!saved[activeResource.id] : false}
+        scheduled={activeResource ? !!scheduled[activeResource.id] : false}
+        onClose={() => setActiveResource(null)}
+        onToggleSave={() => {
+          if (!activeResource) return;
+          setSaved((s) => ({
+            ...s,
+            [activeResource.id]: !s[activeResource.id],
+          }));
+        }}
+        onToggleSchedule={() => {
+          if (!activeResource) return;
+          setScheduled((s) => ({
+            ...s,
+            [activeResource.id]: !s[activeResource.id],
+          }));
+        }}
+      />
     </div>
   );
 }

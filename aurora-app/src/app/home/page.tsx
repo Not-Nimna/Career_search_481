@@ -159,9 +159,11 @@ function JobCard({ job }: { job: (typeof JOBS)[number] }) {
           <Button variant="secondary" className="gap-2">
             <Bookmark className="h-4 w-4" /> Save
           </Button>
-          <Button variant="destructive" className="gap-2">
-            View & Apply <ArrowRight className="h-4 w-4" />
-          </Button>
+          <Link href={"/jobdetails"}>
+            <Button variant="destructive" className="gap-2">
+              View & Apply <ArrowRight className="h-4 w-4" />
+            </Button>
+          </Link>
         </CardFooter>
       </Card>
     </motion.div>
@@ -189,8 +191,10 @@ export default function CareerHome() {
       <header className="sticky top-0 z-40 backdrop-blur bg-white/70 border-b">
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
-            <span className="font-semibold">University Career Hub</span>
+            <Link href="/home" className="inline-flex items-center gap-2">
+              <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
+              <span className="font-semibold">University Career Hub</span>
+            </Link>
           </div>
           <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
             <a className="hover:text-foreground" href="#jobs">

@@ -1,11 +1,13 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Building2, MapPin, Calendar, Clock, Share2, Bookmark, BookmarkCheck, ChevronRight, Briefcase, Code, Cpu, CircuitBoard, Network, Bot, GraduationCap, Link, ExternalLink, CheckCircle2 } from "lucide-react";
+import { Building2, MapPin, Calendar, Clock, Share2, Bookmark, BookmarkCheck, ChevronRight, Briefcase, Code, Cpu, CircuitBoard, Network, Bot, GraduationCap, ExternalLink, CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useRouter } from "next/navigation";
 
+import Link from "next/link";
 export default function JobDetailAurora() {
   const [saved, setSaved] = useState(false);
 
@@ -28,28 +30,25 @@ export default function JobDetailAurora() {
   );
 
   const fmtDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  const router = useRouter();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <Building2 className="h-5 w-5" />
-            <span className="font-semibold">Job Details</span>
+            <Link href="/home" className="inline-flex items-center gap-2">
+              <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
+              <span className="font-semibold">University Career Hub</span>
+            </Link>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => setSaved((s) => !s)}>
-              {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />}
-              {saved ? "Saved" : "Save"}
+
+          <Link href="/profile">
+            <Button variant="destructive" size="sm" className="gap-2">
+              <ExternalLink className="h-4 w-4" /> Profile
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Share2 className="h-4 w-4" /> Share
-            </Button>
-            <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/apply/aurora-robotics-lab")}>
-              Apply Now <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
+          </Link>
         </div>
       </header>
 
@@ -57,6 +56,7 @@ export default function JobDetailAurora() {
         {/* Left column */}
         <section className="lg:col-span-8 space-y-6">
           {/* Title card */}
+
           <Card className="rounded-2xl">
             <CardHeader className="pb-2">
               <div className="flex flex-wrap items-start justify-between gap-4">
@@ -74,9 +74,9 @@ export default function JobDetailAurora() {
                     <span>{job.commitment}</span>
                   </p>
                 </div>
-                <div className="text-right min-w-[200px]">
-                  <div className="text-sm text-muted-foreground">Deadline</div>
-                  <div className="font-medium">{fmtDate(job.deadlineISO)}</div>
+                <div className="flex  justify-end gap-2 min-w-[300px]">
+                  <span className="text-sm text-muted-foreground">Deadline:</span>
+                  <span className="font-medium">{fmtDate(job.deadlineISO)}</span>
                 </div>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -204,8 +204,14 @@ export default function JobDetailAurora() {
         </section>
 
         {/* Right column */}
-        <aside className="lg:col-span-4 space-y-4">
-          <Card className="rounded-2xl">
+        <aside className="lg:col-span-4 ">
+          <Link href="/jobsearch">
+            <Button variant="outline" className="gap-2">
+              ← Back to Search
+            </Button>
+          </Link>
+
+          <Card className="rounded-2xl mt-4">
             <CardHeader className="pb-2">
               <h3 className="text-sm font-semibold">At a glance</h3>
             </CardHeader>
@@ -235,7 +241,7 @@ export default function JobDetailAurora() {
 
             {/* fix starts here */}
             <CardFooter className="flex flex-col gap-2 w-full">
-              <Button variant="destructive" className="w-full gap-2" onClick={() => (window.location.href = "/apply/aurora-robotics-lab")}>
+              <Button variant="destructive" className="w-full gap-2" onClick={() => router.push("/applyjob")}>
                 Apply Now <ChevronRight className="h-4 w-4" />
               </Button>
 

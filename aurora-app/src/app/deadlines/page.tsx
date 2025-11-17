@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-
+import Link from "next/link";
 // --- Types ---
 export type Deadline = {
   id: string;
@@ -185,11 +185,25 @@ export default function DeadlinesPage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            <span className="font-semibold">Deadlines</span>
+            <Link href="/home" className="inline-flex items-center gap-2">
+              <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
+              <span className="font-semibold">University Career Hub</span>
+            </Link>
           </div>
+
+          <Link href="/profile">
+            <Button variant="destructive" size="sm" className="gap-2">
+              <ExternalLink className="h-4 w-4" /> Profile
+            </Button>
+          </Link>
+        </div>
+      </header>
+
+      {/* Filters */}
+      <div className="mx-auto max-w-7xl px-4 pt-4">
+        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative w-[min(60vw,420px)]">
               <Input placeholder="Search role, company, tags…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 pl-9" />
@@ -209,10 +223,6 @@ export default function DeadlinesPage() {
             </Button>
           </div>
         </div>
-      </header>
-
-      {/* Filters */}
-      <div className="mx-auto max-w-7xl px-4 pt-4">
         <div className="grid gap-3 md:grid-cols-3">
           {/* Type */}
           <div className="flex items-center gap-2 flex-wrap">

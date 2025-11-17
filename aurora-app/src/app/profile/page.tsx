@@ -38,6 +38,9 @@ export default function ProfileSettings() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [transcriptFile, setTranscriptFile] = useState<File | null>(null);
 
+  // --- Edit mode ---
+  const [editing, setEditing] = useState(false);
+
   // --- Avatar upload ---
   const [avatar, setAvatar] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -49,12 +52,14 @@ export default function ProfileSettings() {
 
   const onDropAvatar: React.DragEventHandler<HTMLDivElement> = (e) => {
     e.preventDefault();
+    if (!editing) return;
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleAvatar(e.dataTransfer.files[0]);
     }
   };
 
   const onPickAvatar = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!editing) return;
     const f = e.target.files?.[0];
     if (f) handleAvatar(f);
   };
@@ -77,6 +82,7 @@ export default function ProfileSettings() {
   const [roleInput, setRoleInput] = useState("");
   const [skillInput, setSkillInput] = useState("");
   const router = useRouter();
+
   const saveProfile = () => {
     // stub — replace with API call
     console.log({ profile, resumeFile, transcriptFile, avatar });
@@ -88,27 +94,14 @@ export default function ProfileSettings() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       <header className="sticky top-0 z-30 border-b bg-white/70 backdrop-blur">
-        {" "}
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
-            <span className="font-semibold">University Career Hub</span>
+            <Link href="/home" className="inline-flex items-center gap-2">
+              <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
+              <span className="font-semibold">University Career Hub</span>
+            </Link>
           </div>
 
-          {/* <nav className="hidden md:flex items-center gap-6 text-sm text-muted-foreground">
-            <a className="hover:text-foreground" href="/jobsearch">
-              Jobs
-            </a>
-            <a className="hover:text-foreground" href="/#deadlines">
-              Deadlines
-            </a>
-            <a className="hover:text-foreground" href="/#links">
-              Quick Links
-            </a>
-            <a className="hover:text-foreground" href="/#resources">
-              Resources
-            </a>
-          </nav> */}
           <Link href="/home">
             <Button variant="destructive" size="sm" className="gap-2">
               <Home className="h-4 w-4" /> Home
@@ -116,28 +109,41 @@ export default function ProfileSettings() {
           </Link>
         </div>
       </header>
+
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <User2 className="h-5 w-5" />
           <span className="font-semibold">Student Profile</span>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setProfile({
-                ...profile,
-              });
-              // navigate back to home or dashboard
-              router.push("/home");
-            }}>
-            Cancel
-          </Button>
-          <Button variant="destructive" onClick={saveProfile} className="gap-2">
-            <Check className="h-4 w-4" /> Save Changes
-          </Button>
+          {editing ? (
+            <>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEditing(false);
+                  router.push("/home");
+                }}>
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  saveProfile();
+                  setEditing(false);
+                }}
+                className="gap-2">
+                <Check className="h-4 w-4" /> Save Changes
+              </Button>
+            </>
+          ) : (
+            <Button variant="destructive" onClick={() => setEditing(true)} className="gap-2">
+              Edit Profile
+            </Button>
+          )}
         </div>
       </div>
+
       <main className="mx-auto max-w-6xl px-4 py-6 grid gap-6 lg:grid-cols-12">
         {/* Left column */}
         <section className="lg:col-span-4 space-y-6">
@@ -147,17 +153,19 @@ export default function ProfileSettings() {
               <div className="font-semibold">Profile Photo</div>
             </CardHeader>
             <CardContent>
-              <div onDragOver={(e) => e.preventDefault()} onDrop={onDropAvatar} className="relative rounded-2xl border p-4 bg-white text-center">
+              <div onDragOver={(e) => e.preventDefault()} onDrop={onDropAvatar} className={`relative rounded-2xl border p-4 bg-white text-center ${!editing ? "opacity-80" : ""}`}>
                 <div className="mx-auto h-28 w-28 rounded-full overflow-hidden border bg-slate-100 flex items-center justify-center">
                   {avatar ? <img src={avatar} alt="Avatar preview" className="h-full w-full object-cover" /> : <ImageIcon className="h-10 w-10 text-muted-foreground" />}
                 </div>
                 <p className="text-sm text-muted-foreground mt-3">Drag & drop or upload a square image (JPG/PNG)</p>
                 <div className="mt-3 flex items-center justify-center gap-2">
-                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onPickAvatar} />
-                  <Button variant="secondary" className="gap-2" onClick={() => fileInputRef.current?.click()}>
-                    <Upload className="h-4 w-4" /> Upload
-                  </Button>
-                  {avatar && (
+                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onPickAvatar} disabled={!editing} />
+                  {editing && (
+                    <Button variant="secondary" className="gap-2" onClick={() => fileInputRef.current?.click()}>
+                      <Upload className="h-4 w-4" /> Upload
+                    </Button>
+                  )}
+                  {avatar && editing && (
                     <Button variant="ghost" className="gap-2" onClick={() => setAvatar(null)}>
                       <Trash2 className="h-4 w-4" /> Remove
                     </Button>
@@ -176,14 +184,14 @@ export default function ProfileSettings() {
               <div>
                 <div className="text-sm font-medium mb-1">Resume (PDF)</div>
                 <div className="flex items-center gap-2">
-                  <Input type="file" accept="application/pdf" onChange={(e) => setResumeFile(e.target.files?.[0] ?? null)} />
+                  <Input type="file" accept="application/pdf" onChange={(e) => setResumeFile(e.target.files?.[0] ?? null)} disabled={!editing} />
                   {resumeFile && <Badge variant="secondary">{resumeFile.name}</Badge>}
                 </div>
               </div>
               <div>
                 <div className="text-sm font-medium mb-1">Transcript (PDF)</div>
                 <div className="flex items-center gap-2">
-                  <Input type="file" accept="application/pdf" onChange={(e) => setTranscriptFile(e.target.files?.[0] ?? null)} />
+                  <Input type="file" accept="application/pdf" onChange={(e) => setTranscriptFile(e.target.files?.[0] ?? null)} disabled={!editing} />
                   {transcriptFile && <Badge variant="secondary">{transcriptFile.name}</Badge>}
                 </div>
               </div>
@@ -202,42 +210,42 @@ export default function ProfileSettings() {
               <div>
                 <label className="text-sm font-medium">First name</label>
                 <div className="relative">
-                  <Input value={profile.firstName} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} placeholder="Jane" />
+                  <Input value={profile.firstName} disabled={!editing} onChange={(e) => setProfile({ ...profile, firstName: e.target.value })} placeholder="Jane" />
                   <User2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium">Last name</label>
-                <Input value={profile.lastName} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} placeholder="Doe" />
+                <Input value={profile.lastName} disabled={!editing} onChange={(e) => setProfile({ ...profile, lastName: e.target.value })} placeholder="Doe" />
               </div>
               <div>
                 <label className="text-sm font-medium">Email</label>
                 <div className="relative">
-                  <Input type="email" value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} placeholder="jane.doe@ucalgary.ca" />
+                  <Input type="email" value={profile.email} disabled={!editing} onChange={(e) => setProfile({ ...profile, email: e.target.value })} placeholder="jane.doe@ucalgary.ca" />
                   <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium">Phone</label>
                 <div className="relative">
-                  <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} placeholder="(403) 555‑1234" />
+                  <Input value={profile.phone} disabled={!editing} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} placeholder="(403) 555-1234" />
                   <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium">City</label>
                 <div className="relative">
-                  <Input value={profile.city} onChange={(e) => setProfile({ ...profile, city: e.target.value })} placeholder="Calgary" />
+                  <Input value={profile.city} disabled={!editing} onChange={(e) => setProfile({ ...profile, city: e.target.value })} placeholder="Calgary" />
                   <MapPin className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium">Province/State</label>
-                <Input value={profile.province} onChange={(e) => setProfile({ ...profile, province: e.target.value })} placeholder="AB" />
+                <Input value={profile.province} disabled={!editing} onChange={(e) => setProfile({ ...profile, province: e.target.value })} placeholder="AB" />
               </div>
               <div>
                 <label className="text-sm font-medium">Country</label>
-                <Input value={profile.country} onChange={(e) => setProfile({ ...profile, country: e.target.value })} placeholder="Canada" />
+                <Input value={profile.country} disabled={!editing} onChange={(e) => setProfile({ ...profile, country: e.target.value })} placeholder="Canada" />
               </div>
             </CardContent>
           </Card>
@@ -250,16 +258,26 @@ export default function ProfileSettings() {
             <CardContent className="grid gap-4 md:grid-cols-2">
               <div>
                 <label className="text-sm font-medium">Degree</label>
-                <Input value={profile.degree} onChange={(e) => setProfile({ ...profile, degree: e.target.value })} placeholder="BSc" />
+                <Input value={profile.degree} disabled={!editing} onChange={(e) => setProfile({ ...profile, degree: e.target.value })} placeholder="BSc" />
               </div>
               <div>
                 <label className="text-sm font-medium">Major</label>
-                <Input value={profile.major} onChange={(e) => setProfile({ ...profile, major: e.target.value })} placeholder="Software Engineering" />
+                <Input value={profile.major} disabled={!editing} onChange={(e) => setProfile({ ...profile, major: e.target.value })} placeholder="Software Engineering" />
               </div>
               <div>
                 <label className="text-sm font-medium">Graduation year</label>
                 <div className="relative">
-                  <Input list="gradyears" value={String(profile.graduationYear)} onChange={(e) => setProfile({ ...profile, graduationYear: Number(e.target.value) })} />
+                  <Input
+                    list="gradyears"
+                    value={String(profile.graduationYear)}
+                    disabled={!editing}
+                    onChange={(e) =>
+                      setProfile({
+                        ...profile,
+                        graduationYear: Number(e.target.value),
+                      })
+                    }
+                  />
                   <datalist id="gradyears">
                     {YEARS.map((y) => (
                       <option key={y} value={y} />
@@ -270,7 +288,7 @@ export default function ProfileSettings() {
               </div>
               <div>
                 <label className="text-sm font-medium">Work authorization</label>
-                <Input value={profile.workAuth} onChange={(e) => setProfile({ ...profile, workAuth: e.target.value })} placeholder="Citizen/PR / Study Permit / Work Permit" />
+                <Input value={profile.workAuth} disabled={!editing} onChange={(e) => setProfile({ ...profile, workAuth: e.target.value })} placeholder="Citizen/PR / Study Permit / Work Permit" />
               </div>
             </CardContent>
           </Card>
@@ -287,8 +305,16 @@ export default function ProfileSettings() {
                   {["Internship", "Co-op", "Full-time"].map((opt) => (
                     <button
                       key={opt}
+                      type="button"
+                      disabled={!editing}
                       className={`px-2.5 py-1 rounded-full border text-sm ${profile.seeking.has(opt) ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white"}`}
-                      onClick={() => setProfile({ ...profile, seeking: toggleSet(profile.seeking, opt) })}>
+                      onClick={() => {
+                        if (!editing) return;
+                        setProfile({
+                          ...profile,
+                          seeking: toggleSet(profile.seeking, opt),
+                        });
+                      }}>
                       {opt}
                     </button>
                   ))}
@@ -300,8 +326,16 @@ export default function ProfileSettings() {
                   {["Remote", "Hybrid", "On-site"].map((opt) => (
                     <button
                       key={opt}
+                      type="button"
+                      disabled={!editing}
                       className={`px-2.5 py-1 rounded-full border text-sm ${profile.workMode.has(opt) ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white"}`}
-                      onClick={() => setProfile({ ...profile, workMode: toggleSet(profile.workMode, opt) })}>
+                      onClick={() => {
+                        if (!editing) return;
+                        setProfile({
+                          ...profile,
+                          workMode: toggleSet(profile.workMode, opt),
+                        });
+                      }}>
                       {opt}
                     </button>
                   ))}
@@ -323,19 +357,34 @@ export default function ProfileSettings() {
                   {profile.roles.map((r) => (
                     <span key={r} className="inline-flex items-center gap-1 border rounded-full px-2 py-0.5 text-sm">
                       {r}
-                      <button aria-label={`remove ${r}`} onClick={() => setProfile({ ...profile, roles: removeTag(profile.roles, r) })}>
+                      <button
+                        type="button"
+                        aria-label={`remove ${r}`}
+                        disabled={!editing}
+                        onClick={() => {
+                          if (!editing) return;
+                          setProfile({
+                            ...profile,
+                            roles: removeTag(profile.roles, r),
+                          });
+                        }}>
                         <X className="h-3 w-3" />
                       </button>
                     </span>
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <Input value={roleInput} onChange={(e) => setRoleInput(e.target.value)} placeholder="e.g., Software Engineer" />
+                  <Input value={roleInput} disabled={!editing} onChange={(e) => setRoleInput(e.target.value)} placeholder="e.g., Software Engineer" />
                   <Button
                     variant="secondary"
+                    disabled={!editing}
                     onClick={() => {
+                      if (!editing) return;
                       if (roleInput.trim()) {
-                        setProfile({ ...profile, roles: addTag(profile.roles, roleInput) });
+                        setProfile({
+                          ...profile,
+                          roles: addTag(profile.roles, roleInput),
+                        });
                         setRoleInput("");
                       }
                     }}
@@ -349,21 +398,36 @@ export default function ProfileSettings() {
                 <div className="text-sm font-medium mb-2">Skills</div>
                 <div className="flex flex-wrap gap-2 mb-2">
                   {profile.skills.map((s) => (
-                    <Badge key={s} variant="outline" className="rounded-full">
+                    <Badge key={s} variant="outline" className="rounded-full inline-flex items-center">
                       <span className="mr-1">{s}</span>
-                      <button aria-label={`remove ${s}`} onClick={() => setProfile({ ...profile, skills: removeTag(profile.skills, s) })}>
+                      <button
+                        type="button"
+                        aria-label={`remove ${s}`}
+                        disabled={!editing}
+                        onClick={() => {
+                          if (!editing) return;
+                          setProfile({
+                            ...profile,
+                            skills: removeTag(profile.skills, s),
+                          });
+                        }}>
                         <X className="h-3 w-3" />
                       </button>
                     </Badge>
                   ))}
                 </div>
                 <div className="flex gap-2">
-                  <Input value={skillInput} onChange={(e) => setSkillInput(e.target.value)} placeholder="e.g., Python, Terraform, Tableau" />
+                  <Input value={skillInput} disabled={!editing} onChange={(e) => setSkillInput(e.target.value)} placeholder="e.g., Python, Terraform, Tableau" />
                   <Button
                     variant="secondary"
+                    disabled={!editing}
                     onClick={() => {
+                      if (!editing) return;
                       if (skillInput.trim()) {
-                        setProfile({ ...profile, skills: addTag(profile.skills, skillInput) });
+                        setProfile({
+                          ...profile,
+                          skills: addTag(profile.skills, skillInput),
+                        });
                         setSkillInput("");
                       }
                     }}
@@ -384,21 +448,21 @@ export default function ProfileSettings() {
               <div>
                 <label className="text-sm font-medium">LinkedIn</label>
                 <div className="relative">
-                  <Input value={profile.linkedin} onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })} placeholder="linkedin.com/in/username" />
+                  <Input value={profile.linkedin} disabled={!editing} onChange={(e) => setProfile({ ...profile, linkedin: e.target.value })} placeholder="linkedin.com/in/username" />
                   <Linkedin className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
               <div>
                 <label className="text-sm font-medium">GitHub</label>
                 <div className="relative">
-                  <Input value={profile.github} onChange={(e) => setProfile({ ...profile, github: e.target.value })} placeholder="github.com/username" />
+                  <Input value={profile.github} disabled={!editing} onChange={(e) => setProfile({ ...profile, github: e.target.value })} placeholder="github.com/username" />
                   <Github className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
               <div className="md:col-span-2">
                 <label className="text-sm font-medium">Portfolio / Website</label>
                 <div className="relative">
-                  <Input value={profile.website} onChange={(e) => setProfile({ ...profile, website: e.target.value })} placeholder="yourdomain.dev" />
+                  <Input value={profile.website} disabled={!editing} onChange={(e) => setProfile({ ...profile, website: e.target.value })} placeholder="yourdomain.dev" />
                   <Globe className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
@@ -408,7 +472,7 @@ export default function ProfileSettings() {
       </main>
 
       <footer className="border-t bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">Keep your details up‑to‑date — employers see your preferred roles and latest resume.</div>
+        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">Keep your details up-to-date — employers see your preferred roles and latest resume.</div>
       </footer>
     </div>
   );

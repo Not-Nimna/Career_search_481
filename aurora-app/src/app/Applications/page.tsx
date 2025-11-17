@@ -1,389 +1,168 @@
 "use client";
 
 import React, { useMemo, useState } from "react";
-import { ArrowLeft, FileText, FileDown, Building2, Calendar, Clock, CheckCircle2, MessageSquare, Printer, Share2, Download, ExternalLink, Link as LinkIcon, Paperclip, MapPin, User2, Mail, ChevronRight, XCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import { FileText, Building2, Calendar, Clock, Search, ArrowRight, Filter, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
-// --- Types ---
-type ApplicationStatus = "Submitted" | "Under Review" | "Interview_Scheduled" | "Offer" | "Rejected";
+// Mock applications (normally fetched from /api/applications)
+const APPLICATIONS = [
+  {
+    id: "APP-2025-001",
+    jobTitle: "Software Engg Intern",
+    company: "Aurora Robotics Lab",
+    location: "Calgary, AB (Hybrid)",
+    status: "Under Review",
+    submitted: "Oct 28, 2025",
+    deadline: "Nov 8, 2025",
+    type: "Internship",
+  },
+  {
+    id: "APP-2025-002",
+    jobTitle: "Data Analyst Co-op",
+    company: "Prairie Health System",
+    location: "Remote – Canada",
+    status: "Interview Scheduled",
+    submitted: "Oct 15, 2025",
+    deadline: "Nov 12, 2025",
+    type: "Co-op",
+  },
+  {
+    id: "APP-2025-003",
+    jobTitle: "Product Design Intern",
+    company: "Pixel & Pine",
+    location: "Vancouver, BC",
+    status: "Offer Received",
+    submitted: "Sep 30, 2025",
+    deadline: "Oct 15, 2025",
+    type: "Internship",
+  },
+];
 
-type Application = {
-  id: string;
-  status: ApplicationStatus;
-  submittedISO: string;
-  updatedISO: string;
-  job: {
-    id: string;
-    title: string;
-    company: string;
-    location: string;
-    deadlineISO: string;
-  };
-  personal: {
-    name: string;
-    email: string;
-    phone: string;
-    links: {
-      linkedin: string;
-      github: string;
-      portfolio: string;
-    };
-  };
-  documents: {
-    resume: { name: string; sizeMB: number };
-    transcript: { name: string; sizeMB: number };
-    cover?: { name: string; sizeMB: number };
-    extras: { name: string; sizeMB: number }[];
-  };
-  answers: {
-    why: string;
-    project: string;
-  };
-  timeline: { when: string; label: string }[];
-};
-
-// --- Status styles ---
-const STATUS_STYLES: Record<ApplicationStatus, string> = {
+const STATUS_COLORS: Record<string, string> = {
   Submitted: "bg-slate-100 text-slate-800",
   "Under Review": "bg-amber-100 text-amber-800",
-  Interview_Scheduled: "bg-blue-100 text-blue-800",
-  Offer: "bg-emerald-100 text-emerald-800",
+  "Interview Scheduled": "bg-blue-100 text-blue-800",
+  "Offer Received": "bg-emerald-100 text-emerald-800",
   Rejected: "bg-rose-100 text-rose-800",
 };
 
-// --- Mock data ---
-const MOCK_APP: Application = {
-  id: "APP-2025-001",
-  status: "Under Review",
-  submittedISO: "2025-10-28T12:03:00-06:00",
-  updatedISO: "2025-10-29T09:12:00-06:00",
-  job: {
-    id: "aurora-robotics-lab-internship",
-    title: "Software Engineering Intern — Robotics",
-    company: "Aurora Robotics Lab",
-    location: "Calgary, AB (Hybrid)",
-    deadlineISO: "2025-11-08T23:59:00-07:00",
-  },
-  personal: {
-    name: "John Doe",
-    email: "John.Doe@ucalgary.ca",
-    phone: "(403) 555-1234",
-    links: {
-      linkedin: "linkedin.com/in/John",
-      github: "github.com/John",
-      portfolio: "John.dev",
-    },
-  },
-  documents: {
-    resume: { name: "Doe_John_Resume.pdf", sizeMB: 0.48 },
-    transcript: { name: "Doe_John_Transcript.pdf", sizeMB: 1.23 },
-    cover: { name: "Cover_Letter_Aurora.pdf", sizeMB: 0.21 },
-    extras: [
-      { name: "robotics_project_report.pdf", sizeMB: 2.1 },
-      { name: "ros2_demo.zip", sizeMB: 6.7 },
-    ],
-  },
-  answers: {
-    why: "I’m excited about shipping production robotics. My experience with ROS2 nodes for vision and control aligns with Aurora’s stack. I value mentorship and weekly demos.",
-    project: "Built a ROS2-based perception pipeline: camera capture → preprocessing → YOLOv8 for object detection → EKF-based tracking. Wrote nodes in Python/C++, used Docker + CI for reproducible builds.",
-  },
-  timeline: [
-    { when: "2025-10-28T12:03:00-06:00", label: "Application submitted" },
-    { when: "2025-10-29T09:12:00-06:00", label: "Status updated to Under Review" },
-  ],
-};
+export default function ApplicationsPage() {
+  const [query, setQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string | null>(null);
 
-// --- Utils ---
-const fmtDate = (iso: string) =>
-  new Date(iso).toLocaleString(undefined, {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  const filtered = useMemo(() => {
+    return APPLICATIONS.filter((a) => {
+      const matchesQuery = a.jobTitle.toLowerCase().includes(query.toLowerCase()) || a.company.toLowerCase().includes(query.toLowerCase());
+      const matchesStatus = !filterStatus || a.status === filterStatus;
+      return matchesQuery && matchesStatus;
+    });
+  }, [query, filterStatus]);
 
-const fmtTime = (iso: string) =>
-  new Date(iso).toLocaleTimeString(undefined, {
-    hour: "numeric",
-    minute: "2-digit",
-  });
-
-// --- Component ---
-export default function ApplicationDetailCompleted() {
-  const app = useMemo(() => MOCK_APP, []);
-  const [note, setNote] = useState("");
+  const shortSlug = (name: string) => name.split(" ")[0].toLowerCase();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Header */}
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="gap-2" onClick={() => (window.location.href = "/applications")}>
-              <ArrowLeft className="h-4 w-4" /> Back to Applications
-            </Button>
+            <Link href="/home" className="inline-flex items-center gap-2">
+              <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
+              <span className="font-semibold">University Career Hub</span>
+            </Link>
           </div>
-          <div className="flex items-center gap-2">
-            <Badge className={`rounded-full ${STATUS_STYLES[app.status]}`}>
-              {/* map "Interview_Scheduled" → user-friendly label */}
-              {app.status === "Interview_Scheduled" ? "Interview Scheduled" : app.status}
-            </Badge>
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => window.print()}>
-              <Printer className="h-4 w-4" /> Print
+
+          <Link href="/profile">
+            <Button variant="destructive" size="sm" className="gap-2">
+              <ExternalLink className="h-4 w-4" /> Profile
             </Button>
-            <Button variant="outline" size="sm" className="gap-2">
-              <Share2 className="h-4 w-4" /> Share
-            </Button>
-            <Button variant="destructive" size="sm" className="gap-2" onClick={() => alert("Exported as PDF (mock)")}>
-              <Download className="h-4 w-4" /> Export PDF
-            </Button>
-          </div>
+          </Link>
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 grid gap-6 lg:grid-cols-12">
-        {/* Left column: details */}
-        <section className="lg:col-span-8 space-y-6">
-          {/* Job summary */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <h1 className="text-xl font-semibold">{app.job.title}</h1>
-                  <p className="text-sm text-muted-foreground flex flex-wrap items-center gap-2 mt-1">
-                    <span className="inline-flex items-center gap-1">
-                      <Building2 className="h-4 w-4" /> {app.job.company}
-                    </span>
-                    <span>•</span>
-                    <span className="inline-flex items-center gap-1">
-                      <MapPin className="h-4 w-4" /> {app.job.location}
-                    </span>
-                  </p>
-                </div>
-                <div className="text-right min-w-[220px]">
-                  <div className="text-xs text-muted-foreground">Submitted</div>
-                  <div className="font-medium">
-                    {fmtDate(app.submittedISO)} · {fmtTime(app.submittedISO)}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">Last updated</div>
-                  <div className="text-sm">{fmtDate(app.updatedISO)}</div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground">
-              <p>Thanks for applying! Below are the files and responses you submitted. We’ll email you about next steps. You can track changes to your status on this page.</p>
-            </CardContent>
-            <CardFooter className="justify-end gap-2">
-              <Button variant="secondary" className="gap-2" onClick={() => (window.location.href = "/jobs/aurora-robotics-lab")}>
-                View Job <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/apply/aurora-robotics-lab")}>
-                Apply Again <ChevronRight className="h-4 w-4" />
-              </Button>
-            </CardFooter>
-          </Card>
+      <main className="mx-auto max-w-6xl px-4 py-6 space-y-6">
+        {/* Title + Search Row */}
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="relative w-[min(60vw,360px)]">
+              <Input placeholder="Search jobs or companies…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-9 pl-9" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            </div>
+            <Button variant="outline" size="sm" className="gap-2" onClick={() => setFilterStatus(null)}>
+              <Filter className="h-4 w-4" /> Clear Filters
+            </Button>
+          </div>
+        </div>
 
-          {/* Documents */}
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <h2 className="text-lg font-semibold">Submitted documents</h2>
-            </CardHeader>
-          </Card>
-          <Card className="rounded-2xl">
-            <CardContent className="grid gap-3 text-sm">
-              {/* Resume */}
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border">
-                <div className="inline-flex items-center gap-2">
-                  <FileText className="h-4 w-4" /> Resume
-                </div>
-                <div className="text-muted-foreground">
-                  {app.documents.resume.name} · {app.documents.resume.sizeMB.toFixed(2)} MB
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="secondary" className="gap-2">
-                    <FileDown className="h-4 w-4" /> Download
-                  </Button>
-                  <Button size="sm" variant="ghost" className="gap-2">
-                    <ExternalLink className="h-4 w-4" /> Open
-                  </Button>
-                </div>
-              </div>
+        {/* Quick Filter Chips */}
+        <div className="flex flex-wrap gap-2">
+          {[...new Set(APPLICATIONS.map((a) => a.status))].map((s) => (
+            <button key={s} onClick={() => setFilterStatus(filterStatus === s ? null : s)} className={`px-2.5 py-1 rounded-full border text-sm transition ${filterStatus === s ? "bg-slate-900 text-white border-slate-900" : "bg-white"}`}>
+              {s}
+            </button>
+          ))}
+        </div>
 
-              {/* Transcript */}
-              <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border">
-                <div className="inline-flex items-center gap-2">
-                  <FileText className="h-4 w-4" /> Transcript
-                </div>
-                <div className="text-muted-foreground">
-                  {app.documents.transcript.name} · {app.documents.transcript.sizeMB.toFixed(2)} MB
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button size="sm" variant="secondary" className="gap-2">
-                    <FileDown className="h-4 w-4" /> Download
-                  </Button>
-                  <Button size="sm" variant="ghost" className="gap-2">
-                    <ExternalLink className="h-4 w-4" /> Open
-                  </Button>
-                </div>
-              </div>
+        {/* Application list */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((app) => {
+            const slug = shortSlug(app.company); // <-- generate URL like "aurora"
 
-              {/* Cover letter */}
-              {app.documents.cover && (
-                <div className="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border">
-                  <div className="inline-flex items-center gap-2">
-                    <FileText className="h-4 w-4" /> Cover letter
-                  </div>
-                  <div className="text-muted-foreground">
-                    {app.documents.cover.name} · {app.documents.cover.sizeMB.toFixed(2)} MB
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button size="sm" variant="secondary" className="gap-2">
-                      <FileDown className="h-4 w-4" /> Download
-                    </Button>
-                    <Button size="sm" variant="ghost" className="gap-2">
-                      <ExternalLink className="h-4 w-4" /> Open
-                    </Button>
-                  </div>
-                </div>
-              )}
-
-              {/* Extras */}
-              {app.documents.extras.length > 0 && (
-                <div className="p-3 rounded-xl border">
-                  <div className="text-sm font-medium mb-2">Supporting materials</div>
-                  <div className="grid gap-2">
-                    {app.documents.extras.map((f) => (
-                      <div key={f.name} className="flex items-center justify-between gap-2 text-sm">
-                        <span className="inline-flex items-center gap-2">
-                          <Paperclip className="h-4 w-4" />
-                          {f.name}
-                        </span>
-                        <span className="text-muted-foreground">{f.sizeMB.toFixed(2)} MB</span>
-                        <div className="flex items-center gap-2">
-                          <Button size="sm" variant="secondary" className="gap-2">
-                            <FileDown className="h-4 w-4" /> Download
-                          </Button>
-                          <Button size="sm" variant="ghost" className="gap-2">
-                            <ExternalLink className="h-4 w-4" /> Open
-                          </Button>
+            return (
+              <Link key={app.id} href={`/${slug}application`} className="block">
+                <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+                  <Card className="rounded-2xl h-full hover:shadow-lg transition">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <h3 className="text-base font-semibold leading-tight">{app.jobTitle}</h3>
+                          <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                            <Building2 className="h-4 w-4" /> {app.company}
+                          </p>
                         </div>
+                        <Badge className={`rounded-full text-xs font-medium ${STATUS_COLORS[app.status] ?? ""}`}>{app.status}</Badge>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                    </CardHeader>
 
-          {/* Answers */}
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <h2 className="text-lg font-semibold">Responses</h2>
-            </CardHeader>
-            <CardContent className="grid gap-4 text-sm text-muted-foreground">
-              <div>
-                <div className="text-xs font-medium text-foreground mb-1">Why Aurora?</div>
-                <p className="whitespace-pre-wrap">{app.answers.why}</p>
-              </div>
-              <div>
-                <div className="text-xs font-medium text-foreground mb-1">Robotics/AI project</div>
-                <p className="whitespace-pre-wrap">{app.answers.project}</p>
-              </div>
-            </CardContent>
-          </Card>
+                    <CardContent className="text-sm text-muted-foreground space-y-2">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="inline-flex items-center gap-1">
+                          <Calendar className="h-4 w-4" /> Submitted {app.submitted}
+                        </span>
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="h-4 w-4" /> Deadline {app.deadline}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-500">{app.location}</div>
+                      <div className="text-xs text-slate-500">Type: {app.type}</div>
+                    </CardContent>
 
-          {/* Notes (personal) */}
-          <Card className="rounded-2xl">
-            <CardHeader>
-              <h2 className="text-lg font-semibold">Your notes</h2>
-            </CardHeader>
-            <CardContent>
-              <div className="text-sm text-muted-foreground mb-2">Private notes only you can see (e.g., interview prep reminders).</div>
-              <div className="flex items-center gap-2">
-                <Input placeholder="Add a short note…" value={note} onChange={(e) => setNote(e.target.value)} />
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    if (note.trim()) {
-                      alert("Saved (mock)");
-                      setNote("");
-                    }
-                  }}>
-                  Save
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
+                    <CardFooter className="justify-end">
+                      <Button variant="secondary" className="gap-2 w-full">
+                        View Application <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                </motion.div>
+              </Link>
+            );
+          })}
 
-        {/* Right column: timeline & actions */}
-        <aside className="lg:col-span-4 space-y-4">
-          {/* Timeline */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <h3 className="text-sm font-semibold">Status timeline</h3>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm">
-              {app.timeline.map((t) => (
-                <div key={t.when} className="flex items-start gap-2">
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5" />
-                  <div>
-                    <div className="text-foreground">{t.label}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {fmtDate(t.when)} · {fmtTime(t.when)}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-
-          {/* Next steps */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <h3 className="text-sm font-semibold">Next steps</h3>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-2">
-              <div>We’ll email you if you move to a technical screen. Typical SLA: 1–2 weeks.</div>
-              <div className="text-xs">Tip: Prep algorithms + ROS basics and collect 2 project talking points.</div>
-            </CardContent>
-            <CardFooter className="flex flex-col gap-2">
-              <Button variant="secondary" className="w-full gap-2" onClick={() => alert("Message sent (mock)")}>
-                <MessageSquare className="h-4 w-4" /> Message recruiter
-              </Button>
-              <Button variant="ghost" className="w-full gap-2 text-rose-600 hover:text-rose-700" onClick={() => confirm("Withdraw this application?") && alert("Application withdrawn (mock)")}>
-                <XCircle className="h-4 w-4" /> Withdraw application
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Contact */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <h3 className="text-sm font-semibold">Contact</h3>
-            </CardHeader>
-            <CardContent className="text-sm text-muted-foreground space-y-2">
-              <div className="flex items-center gap-2">
-                <User2 className="h-4 w-4" /> Recruiting Team
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" /> careers@aurora-robotics.example
-              </div>
-              <div className="flex items-center gap-2">
-                <LinkIcon className="h-4 w-4" />{" "}
-                <a className="underline" href="/jobs/aurora-robotics-lab">
-                  Job posting
-                </a>
-              </div>
-            </CardContent>
-          </Card>
-        </aside>
+          {filtered.length === 0 && (
+            <Card className="col-span-full rounded-2xl">
+              <CardContent className="py-12 text-center text-muted-foreground">No applications found. Try adjusting your filters.</CardContent>
+            </Card>
+          )}
+        </div>
       </main>
 
       <footer className="border-t bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-8 text-sm text-muted-foreground">This view mirrors what you submitted. Keep an eye on your email for updates.</div>
+        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">Track the progress of all your internship and co-op applications in one place.</div>
       </footer>
     </div>
   );

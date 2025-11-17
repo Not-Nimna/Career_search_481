@@ -7,6 +7,7 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 // --- Mock Data ---
 export type Person = {
@@ -79,13 +80,47 @@ export type Event = {
 };
 
 const EVENTS: Event[] = [
-  { id: "e1", title: "Alumni Coffee Chats — Software", host: "Career Centre", location: "Student Union Hall", when: "Nov 8, 1:00–3:00 PM MT", tags: ["Networking", "SWE"], rsvpUrl: "#" },
-  { id: "e2", title: "Resume Clinic with RBC Data Science", host: "RBC", location: "Room ENG 210", when: "Nov 10, 11:00–1:00 PM MT", tags: ["Resume", "Data"], rsvpUrl: "#" },
-  { id: "e3", title: "Women in Tech Panel", host: "WIT Club", location: "MacHall A", when: "Nov 14, 5:30–7:00 PM MT", tags: ["Panel", "Community"], rsvpUrl: "#" },
+  {
+    id: "e1",
+    title: "Alumni Coffee Chats — Software",
+    host: "Career Centre",
+    location: "Student Union Hall",
+    when: "Nov 8, 1:00–3:00 PM MT",
+    tags: ["Networking", "SWE"],
+    rsvpUrl: "#",
+  },
+  {
+    id: "e2",
+    title: "Resume Clinic with RBC Data Science",
+    host: "RBC",
+    location: "Room ENG 210",
+    when: "Nov 10, 11:00–1:00 PM MT",
+    tags: ["Resume", "Data"],
+    rsvpUrl: "#",
+  },
+  {
+    id: "e3",
+    title: "Women in Tech Panel",
+    host: "WIT Club",
+    location: "MacHall A",
+    when: "Nov 14, 5:30–7:00 PM MT",
+    tags: ["Panel", "Community"],
+    rsvpUrl: "#",
+  },
 ];
 
 // --- Utility ---
 const unique = <T,>(arr: T[]) => Array.from(new Set(arr));
+
+// Simple Fisher–Yates shuffle
+const shuffle = <T,>(arr: T[]): T[] => {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+};
 
 // --- Components ---
 function PeopleListItem({ p, selected, onSelect }: { p: Person; selected: boolean; onSelect: () => void }) {
@@ -183,7 +218,7 @@ function PersonDetail({ p }: { p: Person }) {
         <section>
           <h3 className="font-medium">Suggested intro</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            “Hi {p.name.split(" ")[0]}, I’m a current student interested in {p.skills[0]}. Would you be open to a 15‑minute chat about your path into {p.headline.split("@")[0].trim()}? I can work around your schedule.”
+            “Hi {p.name.split(" ")[0]}, I’m a current student interested in {p.skills[0]}. Would you be open to a 15-minute chat about your path into {p.headline.split("@")[0].trim()}? I can work around your schedule.”
           </p>
         </section>
       </CardContent>
@@ -241,6 +276,7 @@ export default function NetworkingPage() {
   const [query, setQuery] = useState("");
   const [onlyMentors, setOnlyMentors] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(PEOPLE[0]?.id ?? null);
+  const [recommendations, setRecommendations] = useState<Person[]>(() => shuffle(PEOPLE).slice(0, 3));
 
   const facets = useMemo(() => {
     const skills = unique(PEOPLE.flatMap((p) => p.skills)).sort();
@@ -250,62 +286,83 @@ export default function NetworkingPage() {
   }, []);
 
   const filtered = useMemo(() => {
-    const q = query.toLowerCase();
+    const q = query.toLowerCase().trim();
     return PEOPLE.filter((p) => {
+      const baseName = p.name.toLowerCase();
       const base = [p.name, p.headline, p.degree, p.location, p.skills.join(" "), p.willingTo.join(" ")].join(" ").toLowerCase();
       const passMentor = !onlyMentors || p.willingTo.includes("Mentor");
-      return base.includes(q) && passMentor;
+
+      // prioritize search by name, but still let other fields match
+      const matches = q.length === 0 || baseName.includes(q) || base.includes(q);
+
+      return matches && passMentor;
     });
   }, [query, onlyMentors]);
 
   const selected = useMemo(() => filtered.find((x) => x.id === selectedId) ?? filtered[0] ?? null, [filtered, selectedId]);
 
+  const refreshRecommendations = () => {
+    setRecommendations(shuffle(PEOPLE).slice(0, 3));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
       {/* Top bar */}
       <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
-        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <Users2 className="h-5 w-5" />
-            <span className="font-semibold">Networking</span>
+            <Link href="/home" className="inline-flex items-center gap-2">
+              <img src="/logo.png" alt="University Logo" className="h-10 w-10" />
+              <span className="font-semibold">University Career Hub</span>
+            </Link>
+          </div>
+
+          <Link href="/profile">
+            <Button variant="destructive" size="sm" className="gap-2">
+              <ExternalLink className="h-4 w-4" /> Profile
+            </Button>
+          </Link>
+        </div>
+      </header>
+
+      {/* Search + toggles */}
+      <div className="mx-auto max-w-7xl px-4 pt-4">
+        <div className="flex flex-wrap items-center gap-3 justify-between">
+          <div className="relative w-full max-w-md">
+            <Input placeholder="Search people by name…" className="h-10 pl-9" value={query} onChange={(e) => setQuery(e.target.value)} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex items-center gap-2">
-            <div className="relative w-[min(60vw,460px)]">
-              <Input aria-label="Search people" placeholder="Search alumni, mentors, skills, companies…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 pl-9" />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            </div>
-            <Button variant="outline" size="sm" className="gap-2" onClick={() => setOnlyMentors((v) => !v)}>
-              <Star className="h-4 w-4" /> Mentors {onlyMentors ? "✓" : ""}
+            <Button variant={onlyMentors ? "destructive" : "outline"} size="sm" className="gap-2" onClick={() => setOnlyMentors((v) => !v)}>
+              <Users2 className="h-4 w-4" />
+              Mentors only
             </Button>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Layout */}
       <main className="mx-auto max-w-7xl px-4 py-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left column: people directory */}
         <aside className="lg:col-span-5 xl:col-span-4">
-          <Card className="rounded-2xl h-[calc(100vh-160px)] overflow-hidden">
+          <Card className="rounded-2xl h-[calc(100vh-200px)] overflow-hidden">
             <CardHeader className="py-3">
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold">
                   {filtered.length} connection{filtered.length !== 1 ? "s" : ""}
                 </h2>
-                <a className="text-xs text-primary inline-flex items-center gap-1" href="#">
-                  Advanced filters <Filter className="h-3.5 w-3.5" />
-                </a>
               </div>
             </CardHeader>
             <CardContent className="p-3 pt-0 overflow-y-auto h-full space-y-3">
               {filtered.map((p) => (
                 <PeopleListItem key={p.id} p={p} selected={selected?.id === p.id} onSelect={() => setSelectedId(p.id)} />
               ))}
-              {filtered.length === 0 && <div className="text-sm text-muted-foreground p-6 text-center">No matches.</div>}
+              {filtered.length === 0 && <div className="text-sm text-muted-foreground p-6 text-center">No matches. Try a different name.</div>}
             </CardContent>
           </Card>
         </aside>
 
-        {/* Right column: selected person + events */}
+        {/* Right column: selected person + recommendations + events */}
         <section className="lg:col-span-7 xl:col-span-8 space-y-4">
           {selected ? (
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
@@ -316,6 +373,32 @@ export default function NetworkingPage() {
               <CardContent className="py-12 text-center text-muted-foreground">Choose a person to view details.</CardContent>
             </Card>
           )}
+
+          {/* Random recommendations */}
+          <section>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-semibold">Discover new people</h3>
+              <button type="button" onClick={refreshRecommendations} className="text-xs inline-flex items-center gap-1 text-primary hover:underline">
+                Shuffle <Filter className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {recommendations.map((p) => (
+                <PeopleListItem
+                  key={p.id}
+                  p={p}
+                  selected={selected?.id === p.id}
+                  onSelect={() => {
+                    setSelectedId(p.id);
+                    // Scroll up to the detail card on small screens
+                    if (typeof window !== "undefined" && window.innerWidth < 1024) {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </section>
 
           {/* Events rail */}
           <div>
