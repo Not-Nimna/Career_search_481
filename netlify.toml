@@ -1,6 +1,6 @@
 [build]
     functions = "functions"
-    base    = "aurora-app"
+    base    = "/"
     command = "npm run build"
     publish = ".next"
 
