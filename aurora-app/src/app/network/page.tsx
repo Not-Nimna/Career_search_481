@@ -338,6 +338,11 @@ export default function NetworkingPage() {
               Mentors only
             </Button>
           </div>
+          <Link href="/home" className="ml-auto">
+            <Button variant="outline" className="gap-2">
+              ← Back to Home
+            </Button>
+          </Link>
         </div>
       </div>
 

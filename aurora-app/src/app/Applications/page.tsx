@@ -97,6 +97,11 @@ export default function ApplicationsPage() {
               <Filter className="h-4 w-4" /> Clear Filters
             </Button>
           </div>
+          <Link href="/home" className="ml-auto">
+            <Button variant="outline" className="gap-2">
+              ← Back to Home
+            </Button>
+          </Link>
         </div>
 
         {/* Quick Filter Chips */}

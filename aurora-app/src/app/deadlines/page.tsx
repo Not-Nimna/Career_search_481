@@ -222,6 +222,12 @@ export default function DeadlinesPage() {
               <Filter className="h-4 w-4" /> Clear
             </Button>
           </div>
+
+          <Link href="/home" className="ml-auto">
+            <Button variant="outline" className="gap-2">
+              ← Back to Home
+            </Button>
+          </Link>
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           {/* Type */}

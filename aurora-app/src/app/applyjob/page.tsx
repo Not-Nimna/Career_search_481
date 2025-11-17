@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 // ---- Config / Prefill ----
 const PREFILL = {
@@ -87,7 +88,7 @@ export default function AuroraSinglePageApply() {
   const validDocs = !!resume && !!transcript && !tooLarge(resume) && !tooLarge(transcript) && isPdf(resume) && isPdf(transcript);
   const validQuestions = answers.whyAurora.trim().length >= 50 && answers.project.trim().length >= 50;
   const canSubmit = validPersonal && validDocs && validQuestions;
-
+  const router = useRouter();
   // ---- Helpers ----
   const humanFile = (f: File | null) => (f ? `${f.name} · ${(f.size / 1_000_000).toFixed(2)} MB` : "No file");
   const addExtras = (files: FileList | null) => {
@@ -509,7 +510,7 @@ export default function AuroraSinglePageApply() {
                       <Button variant="secondary" onClick={() => (window.location.href = "/applications")}>
                         <BadgeCheck className="h-4 w-4" /> View Status
                       </Button>
-                      <Button variant="ghost" onClick={() => (window.location.href = "/jobs")}>
+                      <Button variant="ghost" onClick={() => router.push("/jobsearch")}>
                         <ArrowRight className="h-4 w-4 rotate-180" /> Back to Jobs
                       </Button>
                     </div>
@@ -522,11 +523,13 @@ export default function AuroraSinglePageApply() {
 
         {/* Right: sticky progress */}
         <aside className="lg:col-span-4">
-          <Link href="/jobdetails">
-            <Button variant="outline" className="gap-2">
-              ← Back to Application
-            </Button>
-          </Link>
+          <div className="flex justify-end">
+            <Link href="/jobdetails">
+              <Button variant="outline" className="gap-2">
+                ← Back to Application
+              </Button>
+            </Link>
+          </div>
           <Card className="rounded-2xl mt-4">
             <CardHeader className="pb-2">
               <div className="font-semibold">Progress</div>

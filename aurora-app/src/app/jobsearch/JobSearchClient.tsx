@@ -497,16 +497,26 @@ export default function JobSearchPage() {
       {/* Page-specific search + filters row */}
       <div className="border-t border-slate-100">
         <div className="relative mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
+          {/* LEFT: Search bar */}
           <div className="relative w-full max-w-md">
             <Input aria-label="Search jobs" placeholder="Search roles, skills, company…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 pl-9" />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           </div>
+
+          {/* Filters button */}
           <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowFilters((v) => !v)}>
             <Filter className="h-4 w-4" /> Filters {activeCount ? `(${activeCount})` : ""}
           </Button>
 
-          {/* Filters Popover (sits above overlay because popover uses z-40) */}
+          {/* Filters Popover */}
           {showFilters && <FiltersPopover allTags={allTags} allTypes={allTypes} allWorkModes={allWorkModes} allLocations={allLocations} value={filters} onChange={setFilters} onClose={() => setShowFilters(false)} />}
+
+          {/* RIGHT: Back to search */}
+          <Link href="/home" className="ml-auto">
+            <Button variant="outline" className="gap-2">
+              ← Back to Home
+            </Button>
+          </Link>
         </div>
       </div>
 

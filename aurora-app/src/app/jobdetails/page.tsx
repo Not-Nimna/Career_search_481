@@ -205,11 +205,13 @@ export default function JobDetailAurora() {
 
         {/* Right column */}
         <aside className="lg:col-span-4 ">
-          <Link href="/jobsearch">
-            <Button variant="outline" className="gap-2">
-              ← Back to Search
-            </Button>
-          </Link>
+          <div className="flex justify-end">
+            <Link href="/jobsearch">
+              <Button variant="outline" className="gap-2">
+                ← Back to Search
+              </Button>
+            </Link>
+          </div>
 
           <Card className="rounded-2xl mt-4">
             <CardHeader className="pb-2">

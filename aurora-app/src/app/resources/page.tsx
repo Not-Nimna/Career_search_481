@@ -386,6 +386,12 @@ export default function ResourcesPage() {
               <Filter className="h-4 w-4" /> Clear
             </Button>
           </div>
+
+          <Link href="/home" className="ml-auto">
+            <Button variant="outline" className="gap-2">
+              ← Back to Home
+            </Button>
+          </Link>
         </div>
 
         <section>

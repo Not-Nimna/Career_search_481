@@ -24,10 +24,10 @@ const JOBS = [
   },
   {
     id: "2",
-    title: "Data Analyst Co‑op",
+    title: "Data Analyst Co-op",
     company: "Prairie Health System",
     location: "Remote – Canada",
-    type: "Co‑op",
+    type: "Co-op",
     postedAt: "1d",
     deadline: "Nov 12",
     tags: ["SQL", "Tableau", "ETL"],
@@ -46,7 +46,7 @@ const JOBS = [
     id: "4",
     title: "Product Design Intern",
     company: "Pixel & Pine",
-    location: "Vancouver, BC (On‑site)",
+    location: "Vancouver, BC (On-site)",
     type: "Internship",
     postedAt: "3d",
     deadline: "Nov 10",
@@ -54,10 +54,10 @@ const JOBS = [
   },
   {
     id: "5",
-    title: "Cybersecurity Co‑op",
+    title: "Cybersecurity Co-op",
     company: "Sentinel Networks",
     location: "Edmonton, AB (Hybrid)",
-    type: "Co‑op",
+    type: "Co-op",
     postedAt: "5h",
     deadline: "Nov 5",
     tags: ["Threat Intel", "Splunk", "Python"],
@@ -77,9 +77,8 @@ const JOBS = [
 const DEADLINES = [
   { label: "Apple Cupertino Online Assessment", date: "Nov 8", href: "#" },
   { label: "Maple Vision AI — ML Intern", date: "Nov 20", href: "#" },
-  { label: "Prairie Health — Data Co‑op", date: "Nov 12", href: "#" },
+  { label: "Prairie Health — Data Co-op", date: "Nov 12", href: "#" },
   { label: "Northstar Energy — DevOps Intern", date: "Nov 18", href: "#" },
-  // New tasks / deadlines
   { label: "Pixel & Pine — Product Design Intern", date: "Nov 10", href: "#" },
   { label: "Sentinel Networks — Cybersecurity Co-op", date: "Nov 5", href: "#" },
   { label: "Aurora Robotics Lab — SWE Intern", date: "Nov 15", href: "#" },
@@ -105,7 +104,7 @@ const QUICK_LINKS = [
   },
   {
     title: "Deadlines",
-    desc: "All upcoming cut‑offs in one place.",
+    desc: "All upcoming cut-offs in one place.",
     icon: <Calendar className="h-5 w-5" aria-hidden />,
     route: "/deadlines",
   },
@@ -174,6 +173,11 @@ export default function CareerHome() {
   const [query, setQuery] = useState("");
   const [onlyRemote, setOnlyRemote] = useState(false);
   const [showAllDeadlines, setShowAllDeadlines] = useState(false);
+
+  // NEW: resource modals
+  const [showResumeModal, setShowResumeModal] = useState(false);
+  const [showAdvisingModal, setShowAdvisingModal] = useState(false);
+
   const router = useRouter();
 
   const filtered = useMemo(() => {
@@ -225,7 +229,7 @@ export default function CareerHome() {
             <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-bold tracking-tight">
               Welcome back — let’s find your next opportunity.
             </motion.h1>
-            <p className="mt-2 text-muted-foreground max-w-2xl">Search internships, co‑ops, and entry‑level roles from trusted employers. Save roles, track applications, and never miss a deadline.</p>
+            <p className="mt-2 text-muted-foreground max-w-2xl">Search internships, co-ops, and entry-level roles from trusted employers. Save roles, track applications, and never miss a deadline.</p>
 
             <div className="mt-6">
               <div className="rounded-2xl border bg-white p-3 shadow-sm">
@@ -291,7 +295,7 @@ export default function CareerHome() {
               </CardFooter>
             </Card>
 
-            {/* ✅ DEADLINES MODAL OVERLAY (ADD THIS PART) */}
+            {/* All Deadlines Modal */}
             {showAllDeadlines && (
               <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
                 <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl px-4">
@@ -309,7 +313,6 @@ export default function CareerHome() {
                       </Button>
                     </CardHeader>
 
-                    {/* 🔥 Scrollable list area */}
                     <CardContent className="space-y-3 overflow-y-auto pr-1 max-h-[60vh]">
                       {DEADLINES.map((d) => (
                         <a key={d.label} href={d.href} className="flex items-center justify-between rounded-xl border px-3 py-2.5 hover:bg-slate-50">
@@ -393,19 +396,134 @@ export default function CareerHome() {
           <CardContent className="md:flex items-center justify-between gap-6 py-8">
             <div>
               <h3 className="text-xl font-semibold">Sharpen your application</h3>
-              <p className="text-sm text-muted-foreground mt-1 max-w-2xl">Use our resume templates, ATS‑ready formats, and interview prep kits. Join weekly clinics and get feedback from career advisors and alumni.</p>
+              <p className="text-sm text-muted-foreground mt-1 max-w-2xl">Use our resume templates, ATS-ready formats, and interview prep kits. Join weekly clinics and get feedback from career advisors and alumni.</p>
             </div>
             <div className="flex gap-3 mt-4 md:mt-0">
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => setShowResumeModal(true)}>
                 <ExternalLink className="h-4 w-4" /> Resume Templates
               </Button>
-              <Button variant="destructive" className="gap-2">
+              <Button variant="destructive" className="gap-2" onClick={() => setShowAdvisingModal(true)}>
                 <ExternalLink className="h-4 w-4" /> Book Advising
               </Button>
             </div>
           </CardContent>
         </Card>
       </section>
+
+      {/* Resume Templates Modal */}
+      {showResumeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl px-4">
+            <Card className="rounded-2xl shadow-xl border max-h-[85vh] flex flex-col bg-white">
+              <CardHeader className="flex flex-row items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold">Resume Templates</h2>
+                  <p className="text-xs text-muted-foreground">ATS-friendly formats tailored for internships, co-ops, and new grads.</p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setShowResumeModal(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+
+              <CardContent className="space-y-4 overflow-y-auto pr-5 max-h-[60vh]">
+                <div className="rounded-xl border p-3 flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-medium">Technical Internship Resume</h3>
+                    <p className="text-xs text-muted-foreground">Focused on projects, skills, and impact for SWE / Data / ML roles.</p>
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <ExternalLink className="h-4 w-4" />
+                    Open
+                  </Button>
+                </div>
+
+                <div className="rounded-xl border p-3 flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-medium">Product / Design Resume</h3>
+                    <p className="text-xs text-muted-foreground">Great for UX, product design, and HCI-heavy roles.</p>
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <ExternalLink className="h-4 w-4" />
+                    Open
+                  </Button>
+                </div>
+
+                <div className="rounded-xl border p-3 flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-medium">New Grad Resume</h3>
+                    <p className="text-xs text-muted-foreground">Emphasizes internships, capstone, and leadership experience.</p>
+                  </div>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <ExternalLink className="h-4 w-4" />
+                    Open
+                  </Button>
+                </div>
+
+                <p className="text-xs text-muted-foreground">Tip: Make a copy of any template and customize it per role. Keep a “master” version with everything, then trim to 1 page for each application.</p>
+              </CardContent>
+
+              <CardFooter className="flex justify-end gap-2 border-t bg-slate-50/60">
+                <Button variant="outline" onClick={() => setShowResumeModal(false)}>
+                  Close
+                </Button>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        </div>
+      )}
+
+      {/* Book Advising Modal */}
+      {showAdvisingModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-2xl px-4">
+            <Card className="rounded-2xl shadow-xl border max-h-[85vh] flex flex-col bg-white">
+              <CardHeader className="flex flex-row items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-lg font-semibold">Book Advising</h2>
+                  <p className="text-xs text-muted-foreground">Meet with a career advisor or alumni mentor for 1:1 feedback.</p>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setShowAdvisingModal(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </CardHeader>
+
+              <CardContent className="space-y-4 overflow-y-auto pr-5 max-h-[60vh]">
+                <div className="rounded-xl border p-3">
+                  <h3 className="text-sm font-medium">Resume / Cover Letter Review</h3>
+                  <p className="text-xs text-muted-foreground mt-1">20–30 minute session focused on one application. Bring your draft resume!</p>
+                </div>
+
+                <div className="rounded-xl border p-3">
+                  <h3 className="text-sm font-medium">Mock Interview</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Practice behavioral or technical interviews with structured feedback.</p>
+                </div>
+
+                <div className="rounded-xl border p-3">
+                  <h3 className="text-sm font-medium">Career Path Chat</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Explore options across SWE, data, and research with someone who&apos;s been there.</p>
+                </div>
+
+                <div className="rounded-xl border p-3 flex items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-sm font-medium">Next Available Slots</h3>
+                    <p className="text-xs text-muted-foreground mt-1">Tue 3:00–4:30 PM · Wed 10:00–11:30 AM · Thu 1:00–3:00 PM</p>
+                  </div>
+                  <Button variant="destructive" size="sm" className="gap-1">
+                    <ExternalLink className="h-4 w-4" />
+                    Open Booking
+                  </Button>
+                </div>
+              </CardContent>
+
+              <CardFooter className="flex justify-end gap-2 border-t bg-slate-50/60">
+                <Button variant="outline" onClick={() => setShowAdvisingModal(false)}>
+                  Close
+                </Button>
+              </CardFooter>
+            </Card>
+          </motion.div>
+        </div>
+      )}
 
       <footer className="border-t bg-white">
         <div className="mx-auto max-w-7xl px-4 py-8 text-sm text-muted-foreground">© {new Date().getFullYear()} University Career Centre · Built for students</div>
