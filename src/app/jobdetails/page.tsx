@@ -45,7 +45,7 @@ export default function JobDetailAurora() {
           </div>
 
           <Link href="/profile">
-            <Button variant="destructive" size="sm" className="gap-2">
+            <Button variant="destructive" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
               <ExternalLink className="h-4 w-4" /> Profile
             </Button>
           </Link>
@@ -244,7 +244,7 @@ export default function JobDetailAurora() {
             {/* fix starts here */}
             <CardFooter className="flex flex-col gap-2 w-full">
               <Button variant="destructive" className="w-full gap-2" onClick={() => router.push("/applyjob")}>
-                Apply Now <ChevronRight className="h-4 w-4" />
+                Proceed to application <ChevronRight className="h-4 w-4" />
               </Button>
 
               <Button variant="secondary" className="w-full gap-2" onClick={() => setSaved((s) => !s)}>
@@ -288,7 +288,7 @@ export default function JobDetailAurora() {
               <div className="font-medium text-foreground">Aurora Robotics Lab</div>
               <p>We build reliable autonomy for real‑world environments. Our teams span perception, controls, and production infrastructure.</p>
               <a className="inline-flex items-center gap-1 text-primary underline" href="#">
-                Website <ExternalLink className="h-4 w-4" />
+                Company Site <ExternalLink className="h-4 w-4" />
               </a>
             </CardContent>
           </Card>

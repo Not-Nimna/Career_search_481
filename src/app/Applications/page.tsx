@@ -66,9 +66,9 @@ export default function ApplicationsPage() {
   const shortSlug = (name: string) => name.split(" ")[0].toLowerCase();
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen bg-[#F8F7F4]">
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b bg-[#F8F7F4]/90 backdrop-blur shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href="/home" className="inline-flex items-center gap-2">
@@ -78,7 +78,7 @@ export default function ApplicationsPage() {
           </div>
 
           <Link href="/profile">
-            <Button variant="destructive" size="sm" className="gap-2">
+            <Button variant="destructive" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
               <ExternalLink className="h-4 w-4" /> Profile
             </Button>
           </Link>
@@ -166,7 +166,7 @@ export default function ApplicationsPage() {
         </div>
       </main>
 
-      <footer className="border-t bg-white">
+      <footer className="border-t ">
         <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">Track the progress of all your internship and co-op applications in one place.</div>
       </footer>
     </div>

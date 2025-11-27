@@ -231,9 +231,9 @@ function JobDetail({ job, saved, onSave }: { job: Job; saved: boolean; onSave: (
             careers@university.example
           </a>
         </div>
-        <Button variant="ghost" className="gap-2">
-          Company site <ExternalLink className="h-4 w-4" />
-        </Button>
+        <a className="inline-flex items-center gap-1 text-primary underline" href="#">
+          Company Site <ExternalLink className="h-4 w-4" />
+        </a>
       </CardFooter>
     </Card>
   );
@@ -324,7 +324,7 @@ function FiltersPopover({
               <button
                 key={w}
                 onClick={() => onChange({ ...value, postedWithin: w })}
-                className={`px-2.5 py-1 rounded-full border text-sm ${value.postedWithin === w ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white"}`}>
+                className={`px-2.5 py-1 rounded-full border text-sm ${value.postedWithin === w ? "bg-slate-900 text-white hover:bg-[#e85a54] focus-visible:ring-slate-900/30" : "bg-white"}`}>
                 {w}
               </button>
             ))}
@@ -338,7 +338,7 @@ function FiltersPopover({
               <button
                 key={opt}
                 onClick={() => onChange({ ...value, deadline: opt })}
-                className={`px-2.5 py-1 rounded-full border text-sm ${value.deadline === opt ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white"}`}>
+                className={`px-2.5 py-1 rounded-full border text-sm ${value.deadline === opt ? "bg-slate-900 text-white hover:bg-[#e85a54] focus-visible:ring-slate-900/30" : "bg-white"}`}>
                 {opt}
               </button>
             ))}
@@ -472,12 +472,12 @@ export default function JobSearchPage() {
   }, [filters]);
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen bg-[#F8F7F4]">
       {/* Full-screen dim + blur when filters are open */}
       {showFilters && <div className="fixed inset-0 z-30 bg-black/30 backdrop-blur-sm" onClick={() => setShowFilters(false)} />}
 
       {/* 🔺 Global top bar (same as home) + page search row */}
-      <header className="sticky top-0 z-20 backdrop-blur bg-white/70 border-b">
+      <header className="sticky top-0 z-40 backdrop-blur bg-[#F8F7F4]/90 shadow-sm border-b border-zinc-200">
         {/* Top nav row */}
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -488,7 +488,7 @@ export default function JobSearchPage() {
           </div>
 
           <Link href="/profile">
-            <Button variant="destructive" size="sm" className="gap-2">
+            <Button variant="secondary" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
               <ExternalLink className="h-4 w-4" /> Profile
             </Button>
           </Link>
@@ -497,10 +497,27 @@ export default function JobSearchPage() {
       {/* Page-specific search + filters row */}
       <div className="border-t border-slate-100">
         <div className="relative mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
-          {/* LEFT: Search bar */}
-          <div className="relative w-full max-w-md">
-            <Input aria-label="Search jobs" placeholder="Search roles, skills, company…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 pl-9" />
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          {/* LEFT: Search bar + button */}
+          <div className="flex w-full max-w-md gap-2">
+            <div className="relative flex-1">
+              <Input aria-label="Search jobs" placeholder="Search roles, skills, company…" value={query} onChange={(e) => setQuery(e.target.value)} className="h-10 pl-9" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            </div>
+
+            <Button
+              variant="secondary"
+              className="h-10 px-4 gap-2 bg-zinc-800 text-white hover:bg-zinc-900 transition-all hover:-translate-y-[1px] hover:shadow-md"
+              onClick={() => {
+                // right now this doesn’t need to do anything special,
+                // because filtering already happens off `query`.
+                // You *could* hook URL sync here later if you like.
+                const trimmed = query.trim();
+                if (!trimmed) return;
+                // e.g. console.log("Search clicked:", trimmed);
+              }}>
+              <Search className="h-4 w-4" />
+              Search
+            </Button>
           </div>
 
           {/* Filters button */}
@@ -513,7 +530,7 @@ export default function JobSearchPage() {
 
           {/* RIGHT: Back to search */}
           <Link href="/home" className="ml-auto">
-            <Button variant="outline" className="gap-2">
+            <Button variant="secondary" className="gap-2">
               ← Back to Home
             </Button>
           </Link>

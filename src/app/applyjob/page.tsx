@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Building2, Calendar, User2, Mail, Phone, Globe, Github, Linkedin, Upload, FileText, FileBadge, X, ExternalLink, Check, AlertTriangle, BadgeCheck, ArrowRight } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -16,11 +16,12 @@ const PREFILL = {
   firstName: "John",
   lastName: "Smith",
   email: "john.smith@ucalgary.ca",
-  phone: "(403) 555‑1234",
+  phone: "(403) 555-1234",
   portfolio: "johnsmith.dev",
   github: "github.com/johnsmith",
   linkedin: "linkedin.com/in/johnsmith",
 };
+
 type WorkMode = "Remote" | "Hybrid" | "On-site";
 
 const WORK_MODES: WorkMode[] = ["Remote", "Hybrid", "On-site"];
@@ -48,9 +49,9 @@ export default function AuroraSinglePageApply() {
     }),
     []
   );
+
   type PersonalState = {
-    // ...other fields
-    workMode: WorkMode | null; // or WorkMode if it's always set
+    workMode: WorkMode | null;
   };
 
   // ---- Personal ----
@@ -62,7 +63,7 @@ export default function AuroraSinglePageApply() {
     linkedin: PREFILL.linkedin,
     github: PREFILL.github,
     portfolio: PREFILL.portfolio,
-    workMode: null,
+    workMode: null as WorkMode | null,
     consent: false,
   });
 
@@ -88,9 +89,37 @@ export default function AuroraSinglePageApply() {
   const validDocs = !!resume && !!transcript && !tooLarge(resume) && !tooLarge(transcript) && isPdf(resume) && isPdf(transcript);
   const validQuestions = answers.whyAurora.trim().length >= 50 && answers.project.trim().length >= 50;
   const canSubmit = validPersonal && validDocs && validQuestions;
+
   const router = useRouter();
+
+  // ---- Missing fields ----
+  const missingPersonal = {
+    firstName: !personal.firstName.trim(),
+    lastName: !personal.lastName.trim(),
+    email: !personal.email.trim(),
+    phone: !personal.phone.trim(),
+    consent: !personal.consent,
+  };
+
+  const missingDocs = {
+    resume: !resume,
+    transcript: !transcript,
+  };
+
+  const missingQuestions = {
+    whyAurora: answers.whyAurora.trim().length < 50,
+    project: answers.project.trim().length < 50,
+  };
+
   // ---- Helpers ----
+  const handleBackClick = () => {
+    const confirmed = window.confirm("If you go back now, you will lose all progress on this application. Do you want to continue?");
+    if (!confirmed) return;
+    router.push("/jobdetails");
+  };
+
   const humanFile = (f: File | null) => (f ? `${f.name} · ${(f.size / 1_000_000).toFixed(2)} MB` : "No file");
+
   const addExtras = (files: FileList | null) => {
     if (!files) return;
     const list = Array.from(files).filter((f) => ACCEPT.extras.includes(f.type) && f.size <= MAX_MB * 1_000_000);
@@ -102,6 +131,7 @@ export default function AuroraSinglePageApply() {
     }
     setExtras(merged);
   };
+
   const dropHandlers = (setter: (f: File) => void, accept: string[]) => ({
     onDragOver: (e: React.DragEvent<HTMLDivElement>) => e.preventDefault(),
     onDrop: (e: React.DragEvent<HTMLDivElement>) => {
@@ -136,7 +166,7 @@ export default function AuroraSinglePageApply() {
           </div>
 
           <Link href="/profile">
-            <Button variant="destructive" size="sm" className="gap-2">
+            <Button variant="destructive" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
               <ExternalLink className="h-4 w-4" /> Profile
             </Button>
           </Link>
@@ -170,48 +200,63 @@ export default function AuroraSinglePageApply() {
               </CardHeader>
               <CardContent className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <label className="text-sm font-medium">First name</label>
-                  <div className="relative">
-                    <Input value={personal.firstName} onChange={(e) => setPersonal({ ...personal, firstName: e.target.value })} placeholder="Jane" />
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    First name
+                    {missingPersonal.firstName && <span className="text-[11px] text-rose-600 font-medium">Required</span>}
+                  </label>
+                  <div className={`relative mt-1 rounded-lg ${missingPersonal.firstName ? "ring-1 ring-rose-300 bg-rose-50/70" : ""}`}>
+                    <Input value={personal.firstName} onChange={(e) => setPersonal({ ...personal, firstName: e.target.value })} placeholder="Jane" className="bg-transparent" />
                     <User2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Last name</label>
-                  <Input value={personal.lastName} onChange={(e) => setPersonal({ ...personal, lastName: e.target.value })} placeholder="Doe" />
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    Last name
+                    {missingPersonal.lastName && <span className="text-[11px] text-rose-600 font-medium">Required</span>}
+                  </label>
+                  <div className={`relative mt-1 rounded-lg ${missingPersonal.lastName ? "ring-1 ring-rose-300 bg-rose-50/70" : ""}`}>
+                    <Input value={personal.lastName} onChange={(e) => setPersonal({ ...personal, lastName: e.target.value })} placeholder="Doe" className="bg-transparent" />
+                    <User2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Email</label>
-                  <div className="relative">
-                    <Input type="email" value={personal.email} onChange={(e) => setPersonal({ ...personal, email: e.target.value })} placeholder="name@university.ca" />
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    Email
+                    {missingPersonal.email && <span className="text-[11px] text-rose-600 font-medium">Required</span>}
+                  </label>
+                  <div className={`relative mt-1 rounded-lg ${missingPersonal.email ? "ring-1 ring-rose-300 bg-rose-50/70" : ""}`}>
+                    <Input value={personal.email} onChange={(e) => setPersonal({ ...personal, email: e.target.value })} placeholder="name@university.ca" className="bg-transparent" />
                     <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">Phone</label>
-                  <div className="relative">
-                    <Input value={personal.phone} onChange={(e) => setPersonal({ ...personal, phone: e.target.value })} placeholder="(403) 555‑1234" />
+                  <label className="text-sm font-medium flex items-center gap-1">
+                    Phone number
+                    {missingPersonal.phone && <span className="text-[11px] text-rose-600 font-medium">Required</span>}
+                  </label>
+                  <div className={`relative mt-1 rounded-lg ${missingPersonal.phone ? "ring-1 ring-rose-300 bg-rose-50/70" : ""}`}>
+                    <Input value={personal.phone} onChange={(e) => setPersonal({ ...personal, phone: e.target.value })} placeholder="(123) 456-7890" className="bg-transparent" />
                     <Phone className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">LinkedIn</label>
-                  <div className="relative">
-                    <Input value={personal.linkedin} onChange={(e) => setPersonal({ ...personal, linkedin: e.target.value })} placeholder="linkedin.com/in/username" />
-                    <Linkedin className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  </div>
-                </div>
-                <div>
                   <label className="text-sm font-medium">GitHub</label>
-                  <div className="relative">
+                  <div className="relative mt-1 rounded-lg">
                     <Input value={personal.github} onChange={(e) => setPersonal({ ...personal, github: e.target.value })} placeholder="github.com/username" />
                     <Github className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
+                <div>
+                  <label className="text-sm font-medium">LinkedIn</label>
+                  <div className="relative mt-1 rounded-lg">
+                    <Input value={personal.linkedin} onChange={(e) => setPersonal({ ...personal, linkedin: e.target.value })} placeholder="linkedin.com/in/username" />
+                    <Linkedin className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  </div>
+                </div>
                 <div className="md:col-span-2">
-                  <label className="text-sm font-medium">Portfolio / Website</label>
-                  <div className="relative">
-                    <Input value={personal.portfolio} onChange={(e) => setPersonal({ ...personal, portfolio: e.target.value })} placeholder="yourdomain.dev" />
+                  <label className="text-sm font-medium">Portfolio website</label>
+                  <div className="relative mt-1 rounded-lg">
+                    <Input value={personal.portfolio} onChange={(e) => setPersonal({ ...personal, portfolio: e.target.value })} placeholder="yourname.dev" />
                     <Globe className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   </div>
                 </div>
@@ -221,11 +266,12 @@ export default function AuroraSinglePageApply() {
                     {WORK_MODES.map((m) => (
                       <button
                         key={m}
-                        className={`px-2.5 py-1 rounded-full border text-sm transition-colors
-          ${personal.workMode === m ? "bg-[#FF6961] text-black border-[#FF6961]" : "bg-white text-gray-700 hover:bg-[#FFE2E0]"}`}
+                        type="button"
+                        className={`px-2.5 py-1 rounded-full border text-sm transition-colors ${personal.workMode === m ? "bg-[#FF6961] text-black border-[#FF6961]" : "bg-white text-gray-700 hover:bg-[#FFE2E0]"}`}
                         onClick={() =>
                           setPersonal((prev) => ({
                             ...prev,
+                            workMode: m,
                           }))
                         }>
                         {m}
@@ -236,7 +282,11 @@ export default function AuroraSinglePageApply() {
 
                 <div className="md:col-span-2 text-sm">
                   <label className="inline-flex items-center gap-2">
-                    <input type="checkbox" className="h-4 w-4" checked={personal.consent} onChange={(e) => setPersonal({ ...personal, consent: e.target.checked })} />I consent to share my application data with Aurora Robotics Lab.
+                    <input type="checkbox" className={`h-4 w-4 ${missingPersonal.consent ? "ring-1 ring-rose-400" : ""}`} checked={personal.consent} onChange={(e) => setPersonal({ ...personal, consent: e.target.checked })} />
+                    <span>
+                      I consent to share my application data with Aurora Robotics Lab.
+                      {missingPersonal.consent && <span className="ml-2 text-[11px] text-rose-600 font-medium">Required</span>}
+                    </span>
                   </label>
                 </div>
               </CardContent>
@@ -260,11 +310,16 @@ export default function AuroraSinglePageApply() {
               <CardContent className="space-y-6">
                 {/* Resume */}
                 <section>
-                  <div className="text-sm font-medium mb-2">
+                  <div className="text-sm font-medium mb-2 flex items-center gap-1">
                     Resume <span className="text-rose-600">*</span>
+                    {missingDocs.resume && <span className="text-[11px] text-rose-600 font-medium">Required</span>}
                   </div>
                   <div className="grid md:grid-cols-2 gap-3">
-                    <div className="rounded-2xl border border-dashed p-4 bg-white text-center cursor-pointer" {...dropHandlers((f) => setResume(f), ACCEPT.resume)} onClick={() => resumeRef.current?.click()} aria-label="Upload resume">
+                    <div
+                      className={`rounded-2xl border border-dashed p-4 bg-white text-center cursor-pointer ${missingDocs.resume ? "border-rose-300 bg-rose-50/70" : ""}`}
+                      {...dropHandlers((f) => setResume(f), ACCEPT.resume)}
+                      onClick={() => resumeRef.current?.click()}
+                      aria-label="Upload resume">
                       <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
                       <div className="mt-2 text-sm">Drag & drop PDF or click to upload</div>
                       <div className="text-xs text-muted-foreground mt-1">Max {MAX_MB} MB</div>
@@ -296,11 +351,16 @@ export default function AuroraSinglePageApply() {
 
                 {/* Transcript */}
                 <section>
-                  <div className="text-sm font-medium mb-2">
+                  <div className="text-sm font-medium mb-2 flex items-center gap-1">
                     Transcript <span className="text-rose-600">*</span>
+                    {missingDocs.transcript && <span className="text-[11px] text-rose-600 font-medium">Required</span>}
                   </div>
                   <div className="grid md:grid-cols-2 gap-3">
-                    <div className="rounded-2xl border border-dashed p-4 bg-white text-center cursor-pointer" {...dropHandlers((f) => setTranscript(f), ACCEPT.transcript)} onClick={() => transcriptRef.current?.click()} aria-label="Upload transcript">
+                    <div
+                      className={`rounded-2xl border border-dashed p-4 bg-white text-center cursor-pointer ${missingDocs.transcript ? "border-rose-300 bg-rose-50/70" : ""}`}
+                      {...dropHandlers((f) => setTranscript(f), ACCEPT.transcript)}
+                      onClick={() => transcriptRef.current?.click()}
+                      aria-label="Upload transcript">
                       <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
                       <div className="mt-2 text-sm">Drag & drop PDF or click to upload</div>
                       <div className="text-xs text-muted-foreground mt-1">Max {MAX_MB} MB</div>
@@ -415,17 +475,45 @@ export default function AuroraSinglePageApply() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium">
+                  <label className="text-sm font-medium flex items-center gap-1">
                     Why Aurora Robotics Lab? <span className="text-rose-600">*</span>
+                    {missingQuestions.whyAurora && <span className="text-[11px] text-rose-600 font-medium">Min 50 characters</span>}
                   </label>
-                  <Textarea value={answers.whyAurora} onChange={(e) => setAnswers({ ...answers, whyAurora: e.target.value })} placeholder="Explain your motivation, relevant experience, and what you hope to learn." rows={4} />
+                  <div className={`mt-1 rounded-lg ${missingQuestions.whyAurora ? "ring-1 ring-rose-300 bg-rose-50/70" : ""}`}>
+                    <Textarea
+                      value={answers.whyAurora}
+                      onChange={(e) =>
+                        setAnswers({
+                          ...answers,
+                          whyAurora: e.target.value,
+                        })
+                      }
+                      placeholder="Explain your motivation, relevant experience, and what you hope to learn."
+                      rows={4}
+                      className="bg-transparent"
+                    />
+                  </div>
                   <div className={`text-xs mt-1 ${answers.whyAurora.length >= 50 ? "text-slate-500" : "text-rose-600"}`}>{answers.whyAurora.length}/50</div>
                 </div>
                 <div>
-                  <label className="text-sm font-medium">
+                  <label className="text-sm font-medium flex items-center gap-1">
                     Describe a robotics/AI project you have built or contributed to <span className="text-rose-600">*</span>
+                    {missingQuestions.project && <span className="text-[11px] text-rose-600 font-medium">Min 50 characters</span>}
                   </label>
-                  <Textarea value={answers.project} onChange={(e) => setAnswers({ ...answers, project: e.target.value })} placeholder="Include your role, stack (e.g., Python, ROS, CV), and outcomes." rows={5} />
+                  <div className={`mt-1 rounded-lg ${missingQuestions.project ? "ring-1 ring-rose-300 bg-rose-50/70" : ""}`}>
+                    <Textarea
+                      value={answers.project}
+                      onChange={(e) =>
+                        setAnswers({
+                          ...answers,
+                          project: e.target.value,
+                        })
+                      }
+                      placeholder="Include your role, stack (e.g., Python, ROS, CV), and outcomes."
+                      rows={5}
+                      className="bg-transparent"
+                    />
+                  </div>
                   <div className={`text-xs mt-1 ${answers.project.length >= 50 ? "text-slate-500" : "text-rose-600"}`}>{answers.project.length}/50</div>
                 </div>
               </CardContent>
@@ -461,7 +549,7 @@ export default function AuroraSinglePageApply() {
                     <li>LinkedIn: {personal.linkedin || "—"}</li>
                     <li>GitHub: {personal.github || "—"}</li>
                     <li>Portfolio: {personal.portfolio || "—"}</li>
-                    <li>Work mode: {personal.workMode}</li>
+                    <li>Work mode: {personal.workMode || "—"}</li>
                   </ul>
                 </section>
                 <section>
@@ -524,11 +612,9 @@ export default function AuroraSinglePageApply() {
         {/* Right: sticky progress */}
         <aside className="lg:col-span-4">
           <div className="flex justify-end">
-            <Link href="/jobdetails">
-              <Button variant="outline" className="gap-2">
-                ← Back to Application
-              </Button>
-            </Link>
+            <Button variant="outline" className="gap-2" onClick={handleBackClick}>
+              ← Back to Company details
+            </Button>
           </div>
           <Card className="rounded-2xl mt-4">
             <CardHeader className="pb-2">
@@ -538,15 +624,15 @@ export default function AuroraSinglePageApply() {
             <CardContent className="space-y-2 text-sm">
               <a href="#personal" className={`flex items-center justify-between rounded-lg border px-3 py-2 ${validPersonal ? "bg-emerald-50 border-emerald-200" : "bg-white"}`}>
                 <span>Personal</span>
-                {validPersonal && <BadgeCheck className="h-4 w-4 text-emerald-600" />}
+                {validPersonal ? <BadgeCheck className="h-4 w-4 text-emerald-600" /> : <span className="text-[11px] text-rose-600 font-medium">Missing</span>}
               </a>
               <a href="#documents" className={`flex items-center justify-between rounded-lg border px-3 py-2 ${validDocs ? "bg-emerald-50 border-emerald-200" : "bg-white"}`}>
                 <span>Documents</span>
-                {validDocs && <BadgeCheck className="h-4 w-4 text-emerald-600" />}
+                {validDocs ? <BadgeCheck className="h-4 w-4 text-emerald-600" /> : <span className="text-[11px] text-rose-600 font-medium">Missing</span>}
               </a>
               <a href="#questions" className={`flex items-center justify-between rounded-lg border px-3 py-2 ${validQuestions ? "bg-emerald-50 border-emerald-200" : "bg-white"}`}>
                 <span>Questions</span>
-                {validQuestions && <BadgeCheck className="h-4 w-4 text-emerald-600" />}
+                {validQuestions ? <BadgeCheck className="h-4 w-4 text-emerald-600" /> : <span className="text-[11px] text-rose-600 font-medium">Missing</span>}
               </a>
               <a href="#review" className="flex items-center justify-between rounded-lg border px-3 py-2">
                 <span>Review & Submit</span>

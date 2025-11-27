@@ -30,11 +30,11 @@ const DEADLINES: Deadline[] = [
     location: "Calgary, AB (Hybrid)",
     dueISO: "2025-11-08T23:59:00-07:00",
     tags: ["SWE", "Python", "React"],
-    link: "/apply/aurora-robotics-lab",
+    link: "/auroraapplication",
     notes: "Use the in‑app Apply flow.",
   },
-  { id: "d2", title: "Data Analyst Co-op", company: "Prairie Health System", type: "Co-op", location: "Remote – Canada", dueISO: "2025-11-12T17:00:00-07:00", tags: ["SQL", "Tableau"], link: "#" },
-  { id: "d3", title: "Product Design Intern", company: "Pixel & Pine", type: "Internship", location: "Vancouver, BC (On‑site)", dueISO: "2025-11-10T23:59:00-07:00", tags: ["Figma", "UX"], link: "#" },
+  { id: "d2", title: "Data Analyst Co-op", company: "Prairie Health System", type: "Co-op", location: "Remote – Canada", dueISO: "2025-11-12T17:00:00-07:00", tags: ["SQL", "Tableau"], link: "/prairieapplication" },
+  { id: "d3", title: "Product Design Intern", company: "Pixel & Pine", type: "Internship", location: "Vancouver, BC (On‑site)", dueISO: "2025-11-10T23:59:00-07:00", tags: ["Figma", "UX"], link: "/pixelapplication" },
   { id: "d4", title: "Cloud DevOps Intern", company: "Northstar Energy", type: "Internship", location: "Calgary, AB", dueISO: "2025-11-18T23:59:00-07:00", tags: ["AWS", "Terraform"], link: "#" },
   { id: "d5", title: "Women in Tech Panel (RSVP)", company: "WIT Club", type: "Event", location: "MacHall A", dueISO: "2025-11-14T17:30:00-07:00", tags: ["Panel", "Networking"], link: "#", notes: "Arrive 10 minutes early." },
   { id: "d6", title: "RBC DS Resume Clinic (RSVP)", company: "RBC", type: "Event", location: "Room ENG 210", dueISO: "2025-11-10T11:00:00-07:00", tags: ["Resume", "Data"], link: "#" },
@@ -182,9 +182,9 @@ export default function DeadlinesPage() {
   const grouped = useMemo(() => groupByDate(filtered), [filtered]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen bg-[#F8F7F4]">
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b bg-[#F8F7F4]/90 backdrop-blur shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <Link href="/home" className="inline-flex items-center gap-2">
@@ -194,7 +194,7 @@ export default function DeadlinesPage() {
           </div>
 
           <Link href="/profile">
-            <Button variant="destructive" size="sm" className="gap-2">
+            <Button variant="destructive" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
               <ExternalLink className="h-4 w-4" /> Profile
             </Button>
           </Link>
@@ -231,28 +231,28 @@ export default function DeadlinesPage() {
         </div>
         <div className="grid gap-3 md:grid-cols-3">
           {/* Type */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-start gap-2 flex-wrap">
             <span className="text-sm text-muted-foreground">Type:</span>
             {allTypes.map((t) => (
-              <button key={t} onClick={() => setTypeFilter(t)} className={`px-2.5 py-1 rounded-full border text-sm ${typeFilter === t ? "bg-[#FF6961] text-black border-[#FF6961]" : "bg-white hover:bg-[#FFE2E0]"}`}>
+              <button key={t} onClick={() => setTypeFilter(t)} className={`px-2.5 py-1 rounded-full border text-sm ${typeFilter === t ? "bg-slate-700 text-white border-slate-300" : "bg-white hover:bg-slate-100"}`}>
                 {t}
               </button>
             ))}
           </div>
           {/* Month */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-start gap-2 flex-wrap">
             <span className="text-sm text-muted-foreground">Month:</span>
             {allMonths.map((m) => (
-              <button key={m} onClick={() => setMonthFilter(m)} className={`px-2.5 py-1 rounded-full border text-sm ${monthFilter === m ? "bg-[#FF6961] text-black border-[#FF6961]" : "bg-white hover:bg-[#FFE2E0]"}`}>
+              <button key={m} onClick={() => setMonthFilter(m)} className={`px-2.5 py-1 rounded-full border text-sm ${monthFilter === m ? "bg-slate-700 text-white border-slate-300" : "bg-white hover:bg-slate-100"}`}>
                 {m}
               </button>
             ))}
           </div>
           {/* Tag */}
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-start gap-2 flex-wrap">
             <span className="text-sm text-muted-foreground">Tag:</span>
             {["All", ...allTags].map((t) => (
-              <button key={t} onClick={() => setTagFilter(t === "All" ? null : t)} className={`px-2.5 py-1 rounded-full border text-sm ${(tagFilter ?? "All") === t ? "bg-[#FF6961] text-black border-[#FF6961]" : "bg-white hover:bg-[#FFE2E0]"}`}>
+              <button key={t} onClick={() => setTagFilter(t === "All" ? null : t)} className={`px-2.5 py-1 rounded-full border text-sm ${(tagFilter ?? "All") === t ? "bg-slate-700 text-white border-slate-300 " : "bg-white hover:bg-slate-100"}`}>
                 {t}
               </button>
             ))}
@@ -303,9 +303,11 @@ export default function DeadlinesPage() {
                 <h3 className="text-lg font-semibold">Pro tip: Apply early</h3>
                 <p className="text-sm text-muted-foreground mt-1">Many roles review on a rolling basis — aim to submit a week ahead.</p>
               </div>
-              <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/jobs")}>
-                Browse Jobs <ChevronRight className="h-4 w-4" />
-              </Button>
+              <Link href="/jobsearch">
+                <Button variant="secondary" className="gap-2">
+                  Browse Jobs <ChevronRight className="h-4 w-4" />
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </section>

@@ -220,7 +220,7 @@ function ResourceCard({ r, saved, scheduled, onSave, onOpen }: ResourceCardProps
             {saved ? "Saved" : "Save"}
           </Button>
           <Button
-            variant="destructive"
+            variant="default"
             className="gap-2"
             onClick={(e) => {
               e.stopPropagation();
@@ -347,9 +347,9 @@ export default function ResourcesPage() {
   }, [query, typeFilter, tagFilter]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen bg-[#F8F7F4]">
       {/* Header */}
-      <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b bg-[#F8F7F4]/90 backdrop-blur shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <Link href="/home" className="inline-flex items-center gap-2">
@@ -359,7 +359,7 @@ export default function ResourcesPage() {
           </div>
 
           <Link href="/profile">
-            <Button variant="destructive" size="sm" className="gap-2">
+            <Button variant="destructive" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
               <ExternalLink className="h-4 w-4" /> Profile
             </Button>
           </Link>
@@ -404,7 +404,7 @@ export default function ResourcesPage() {
                   <button
                     key={k}
                     onClick={() => setTypeFilter(k)}
-                    className={`px-2.5 py-1 rounded-full border text-sm transition ${typeFilter === k ? "bg-[#FF6961] text-black border-transparent hover:bg-[#e85a54]" : "bg-white text-slate-700 hover:bg-slate-50"}`}>
+                    className={`px-2.5 py-1 rounded-full border text-sm transition ${typeFilter === k ? "bg-slate-700 text-white border-transparent hover:bg-[#e85a54]" : "bg-white text-slate-700 hover:bg-slate-50"}`}>
                     {k}
                   </button>
                 ))}
@@ -418,7 +418,7 @@ export default function ResourcesPage() {
                   <button
                     key={t}
                     onClick={() => setTagFilter(t === "All" ? null : t)}
-                    className={`px-2.5 py-1 rounded-full border text-sm ${(tagFilter ?? "All") === t ? "bg-[#FF6961] text-black hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white text-slate-700 hover:bg-slate-50"}`}>
+                    className={`px-2.5 py-1 rounded-full border text-sm ${(tagFilter ?? "All") === t ? "bg-slate-700 text-white border-transparent hover:bg-[#e85a54] focus-visible:ring-[#FF6961]/30" : "bg-white text-slate-700 hover:bg-slate-50"}`}>
                     {t}
                   </button>
                 ))}

@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { Search, MapPin, Clock, ExternalLink, GraduationCap, Calendar, Briefcase, Building2, Filter, Star, ArrowRight, Bookmark, X } from "lucide-react";
+import { Search, MapPin, Clock, ExternalLink, GraduationCap, Calendar, Briefcase, Building2, Filter, ArrowRight, Bookmark, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -75,14 +75,14 @@ const JOBS = [
 ];
 
 const DEADLINES = [
-  { label: "Apple Cupertino Online Assessment", date: "Nov 8", href: "#" },
-  { label: "Maple Vision AI — ML Intern", date: "Nov 20", href: "#" },
-  { label: "Prairie Health — Data Co-op", date: "Nov 12", href: "#" },
-  { label: "Northstar Energy — DevOps Intern", date: "Nov 18", href: "#" },
-  { label: "Pixel & Pine — Product Design Intern", date: "Nov 10", href: "#" },
-  { label: "Sentinel Networks — Cybersecurity Co-op", date: "Nov 5", href: "#" },
-  { label: "Aurora Robotics Lab — SWE Intern", date: "Nov 15", href: "#" },
   { label: "UCalgary CS Club — Hackathon Registration", date: "Nov 3", href: "#" },
+  { label: "Sentinel Networks — Cybersecurity Co-op", date: "Nov 5", href: "#" },
+  { label: "Apple Cupertino Online Assessment", date: "Nov 8", href: "#" },
+  { label: "Pixel & Pine — Product Design Intern", date: "Nov 10", href: "#" },
+  { label: "Prairie Health — Data Co-op", date: "Nov 12", href: "#" },
+  { label: "Aurora Robotics Lab — SWE Intern", date: "Nov 15", href: "#" },
+  { label: "Northstar Energy — DevOps Intern", date: "Nov 18", href: "#" },
+  { label: "Maple Vision AI — ML Intern", date: "Nov 20", href: "#" },
   { label: "RBC — New Grad SWE", date: "Dec 1", href: "#" },
   { label: "Google STEP Intern — Application", date: "Dec 5", href: "#" },
   { label: "Amazon Propel — Online Assessment", date: "Dec 7", href: "#" },
@@ -126,7 +126,7 @@ function JobCard({ job }: { job: (typeof JOBS)[number] }) {
             <div>
               <h3 className="text-lg font-semibold leading-tight">{job.title}</h3>
               <p className="text-sm text-muted-foreground flex items-center gap-2 mt-1">
-                <Star className="h-4 w-4" aria-hidden /> {job.company}
+                <Building2 className="h-4 w-4" aria-hidden /> {job.company}
               </p>
             </div>
             <Badge variant="secondary" className="text-xs px-2 py-1">
@@ -215,7 +215,7 @@ export default function CareerHome() {
             </a>
           </nav>
           <Link href="/profile">
-            <Button variant="destructive" size="sm" className="gap-2">
+            <Button variant="secondary" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
               <ExternalLink className="h-4 w-4" /> Profile
             </Button>
           </Link>
@@ -242,8 +242,8 @@ export default function CareerHome() {
                     <Filter className="h-4 w-4" /> {onlyRemote ? "Remote Only ✓" : "Remote Only"}
                   </Button>
                   <Button
-                    variant="destructive"
-                    className="h-12 gap-2"
+                    variant="secondary"
+                    className="h-12 gap-2 bg-zinc-800 text-white hover:bg-zinc-900 transition-all hover:-translate-y-[1px] hover:shadow-md"
                     onClick={() => {
                       const q = query.trim();
                       router.push(`/jobsearch${q ? `?q=${encodeURIComponent(q)}` : ""}`);
@@ -343,7 +343,7 @@ export default function CareerHome() {
       {/* Recommended Jobs */}
       <section id="jobs" className="mx-auto max-w-7xl px-4 pb-12 ">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-3xl font-light">Recommended for You</h2>
+          <h2 className="text-3xl font-light">Recomendations based on your recent interests </h2>
           <Link href="/jobsearch" passHref>
             <Button variant="ghost" className="gap-2">
               See more...

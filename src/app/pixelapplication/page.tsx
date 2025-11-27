@@ -129,9 +129,9 @@ export default function PixelPineApplicationDetail() {
   const [note, setNote] = useState("");
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen bg-[#F8F7F4]">
       {/* Top bar (same as Aurora / University Career Hub) */}
-      <header className="sticky top-0 z-30 border-b bg-white/80 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b bg-[#F8F7F4]/90 backdrop-blur shadow-sm">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
             <Link href="/home" className="inline-flex items-center gap-2">
@@ -141,7 +141,7 @@ export default function PixelPineApplicationDetail() {
           </div>
 
           <Link href="/profile">
-            <Button variant="destructive" size="sm" className="gap-2">
+            <Button variant="destructive" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
               <ExternalLink className="h-4 w-4" /> Profile
             </Button>
           </Link>
