@@ -36,7 +36,7 @@ const JOBS = [
     id: "3",
     title: "Cloud DevOps Intern",
     company: "Northstar Energy",
-    location: "Calgary, AB",
+    location: "Calgary, AB - in person",
     type: "Internship",
     postedAt: "4d",
     deadline: "Nov 18",
@@ -120,7 +120,7 @@ const QUICK_LINKS = [
 function JobCard({ job }: { job: (typeof JOBS)[number] }) {
   return (
     <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className="rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+      <Card className="rounded-2xl shadow-sm hover:shadow-md transition-all border border-zinc-200 bg-[#F4F4F3] hover:bg-[#EDEDED] hover:-translate-y-[1px]">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-3">
             <div>
@@ -190,9 +190,9 @@ export default function CareerHome() {
   }, [query, onlyRemote]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-slate-50">
+    <div className="min-h-screen bg-[#F8F7F4]">
       {/* Topbar */}
-      <header className="sticky top-0 z-40 backdrop-blur bg-white/70 border-b">
+      <header className="sticky top-0 z-40 backdrop-blur bg-[#F8F7F4]/90 shadow-sm border-b border-zinc-200">
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Link href="/home" className="inline-flex items-center gap-2">
@@ -226,7 +226,7 @@ export default function CareerHome() {
       <section className="mx-auto max-w-7xl px-4 pt-10 pb-6">
         <div className="grid lg:grid-cols-3 gap-6 items-start">
           <div className="lg:col-span-2">
-            <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-3xl md:text-4xl font-bold tracking-tight">
+            <motion.h1 initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="text-3xl md:text-6xl font-light tracking-tight">
               Welcome back — let’s find your next opportunity.
             </motion.h1>
             <p className="mt-2 text-muted-foreground max-w-2xl">Search internships, co-ops, and entry-level roles from trusted employers. Save roles, track applications, and never miss a deadline.</p>
@@ -269,11 +269,11 @@ export default function CareerHome() {
 
           {/* Deadlines at a glance */}
           <aside id="deadlines" className="lg:col-span-1 relative">
-            <Card className="rounded-2xl">
+            <Card className="rounded-2xl ">
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  <h2 className="text-lg font-semibold">Deadlines at a Glance</h2>
+                  <h2 className="text-3xl font-light">Deadlines at a Glance</h2>
                 </div>
               </CardHeader>
 
@@ -341,9 +341,9 @@ export default function CareerHome() {
       </section>
 
       {/* Recommended Jobs */}
-      <section id="jobs" className="mx-auto max-w-7xl px-4 pb-12">
+      <section id="jobs" className="mx-auto max-w-7xl px-4 pb-12 ">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Recommended for You</h2>
+          <h2 className="text-3xl font-light">Recommended for You</h2>
           <Link href="/jobsearch" passHref>
             <Button variant="ghost" className="gap-2">
               See more...
@@ -364,10 +364,10 @@ export default function CareerHome() {
       </section>
 
       {/* Quick Links */}
-      <section id="links" className="bg-white border-t">
+      <section id="links" className="border">
         <div className="mx-auto max-w-7xl px-4 py-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Quick Links</h2>
+            <h2 className="text-3xl font-light">Quick Links</h2>
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
@@ -390,7 +390,7 @@ export default function CareerHome() {
       {/* Resources & CTA */}
       <section id="resources" className="mx-auto max-w-7xl px-4 py-12">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Resources</h2>
+          <h2 className="text-3xl font-light">Resources</h2>
         </div>
         <Card className="rounded-2xl">
           <CardContent className="md:flex items-center justify-between gap-6 py-8">

@@ -1,8 +1,8 @@
 "use client";
-import React, { useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { User2, Mail, Phone, Calendar, GraduationCap, MapPin, Linkedin, Github, Globe, Plus, Trash2, Upload, X, Check, Briefcase, Building2, Home, Image as ImageIcon } from "lucide-react";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import React, { useRef, useState } from "react";
+
+import { User2, Mail, Phone, Calendar, MapPin, Linkedin, Github, Globe, Plus, Trash2, Upload, X, Check, Home, Image as ImageIcon } from "lucide-react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -472,7 +472,10 @@ export default function ProfileSettings() {
       </main>
 
       <footer className="border-t bg-white">
-        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">Keep your details up-to-date — employers see your preferred roles and latest resume.</div>
+        <div className="mx-auto max-w-6xl px-4 py-6 text-sm text-muted-foreground">
+          Keep your details up-to-date — employers see your preferred roles and latest resume. This information is used exclusively to process your applications and improve job matching. Your data is not stored for resale or external distribution,
+          and it is only shared with an employer when you submit an application.
+        </div>
       </footer>
     </div>
   );

@@ -534,91 +534,103 @@ export default function JobSearchPage() {
                   Sort by date <ChevronRight className="h-3 w-3" />
                 </button>
               </div>
-              {/* Active filter chips */}
-              <div className="mt-2 flex flex-wrap gap-2">
-                {filters.workModes.map((m) => (
-                  <span key={m} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
-                    {m}
-                    <button
-                      aria-label={`remove ${m}`}
-                      onClick={() =>
-                        setFilters({
-                          ...filters,
-                          workModes: filters.workModes.filter((x) => x !== m),
-                        })
-                      }>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-                {filters.types.map((t) => (
-                  <span key={t} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
-                    {t}
-                    <button
-                      aria-label={`remove ${t}`}
-                      onClick={() =>
-                        setFilters({
-                          ...filters,
-                          types: filters.types.filter((x) => x !== t),
-                        })
-                      }>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-                {filters.locations.map((l) => (
-                  <span key={l} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
-                    {l}
-                    <button
-                      aria-label={`remove ${l}`}
-                      onClick={() =>
-                        setFilters({
-                          ...filters,
-                          locations: filters.locations.filter((x) => x !== l),
-                        })
-                      }>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-                {filters.tags.map((t) => (
-                  <span key={t} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
-                    {t}
-                    <button
-                      aria-label={`remove ${t}`}
-                      onClick={() =>
-                        setFilters({
-                          ...filters,
-                          tags: filters.tags.filter((x) => x !== t),
-                        })
-                      }>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
-                {filters.postedWithin !== "any" && (
-                  <span className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
-                    posted: {filters.postedWithin}
-                    <button aria-label="remove posted filter" onClick={() => setFilters({ ...filters, postedWithin: "any" })}>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                )}
-                {filters.deadline !== "any" && (
-                  <span className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
-                    deadline: {filters.deadline}
-                    <button aria-label="remove deadline filter" onClick={() => setFilters({ ...filters, deadline: "any" })}>
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                )}
-                {activeCount > 0 && (
-                  <button className="text-xs underline ml-1" onClick={() => setFilters(DEFAULT_FILTERS)}>
+
+              {/* 🔍 Active filter indicator row */}
+              {activeCount > 0 ? (
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="text-[11px] uppercase tracking-wide text-slate-500">Active filters:</span>
+
+                  {filters.workModes.map((m) => (
+                    <span key={m} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
+                      {m}
+                      <button
+                        aria-label={`remove ${m}`}
+                        onClick={() =>
+                          setFilters({
+                            ...filters,
+                            workModes: filters.workModes.filter((x) => x !== m),
+                          })
+                        }>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {filters.types.map((t) => (
+                    <span key={t} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
+                      {t}
+                      <button
+                        aria-label={`remove ${t}`}
+                        onClick={() =>
+                          setFilters({
+                            ...filters,
+                            types: filters.types.filter((x) => x !== t),
+                          })
+                        }>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {filters.locations.map((l) => (
+                    <span key={l} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
+                      {l}
+                      <button
+                        aria-label={`remove ${l}`}
+                        onClick={() =>
+                          setFilters({
+                            ...filters,
+                            locations: filters.locations.filter((x) => x !== l),
+                          })
+                        }>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {filters.tags.map((t) => (
+                    <span key={t} className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
+                      {t}
+                      <button
+                        aria-label={`remove ${t}`}
+                        onClick={() =>
+                          setFilters({
+                            ...filters,
+                            tags: filters.tags.filter((x) => x !== t),
+                          })
+                        }>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+
+                  {filters.postedWithin !== "any" && (
+                    <span className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
+                      posted: {filters.postedWithin}
+                      <button aria-label="remove posted filter" onClick={() => setFilters({ ...filters, postedWithin: "any" })}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  )}
+
+                  {filters.deadline !== "any" && (
+                    <span className="text-xs inline-flex items-center gap-1 border rounded-full px-2 py-0.5">
+                      deadline: {filters.deadline}
+                      <button aria-label="remove deadline filter" onClick={() => setFilters({ ...filters, deadline: "any" })}>
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  )}
+
+                  <button className="text-[11px] underline ml-1" onClick={() => setFilters(DEFAULT_FILTERS)}>
                     Clear all
                   </button>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="mt-2 text-[11px] text-slate-400">No filters applied</div>
+              )}
             </CardHeader>
+
             <CardContent className="p-3 pt-0 overflow-y-auto h-full space-y-3">
               {filtered.map((job) => (
                 <JobListItem key={job.id} job={job} selected={effectiveSelectedId === job.id} saved={!!saved[job.id]} onSelect={() => setSelectedId(job.id)} onSave={() => toggleSave(job.id)} />
