@@ -43,16 +43,16 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-red-900 via-red-800 to-red-700 text-slate-900">
       {/* Top grey bar with logo */}
-      <header className="w-full bg-neutral-100 border-b border-neutral-200 px-4 sm:px-8 py-3 flex items-center justify-between" aria-label="University of Calgary">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-12 bg-yellow-500 rounded-sm shadow-sm border border-black/20" aria-hidden="true" />
-          <span className="text-xs font-semibold leading-tight tracking-[0.18em] text-neutral-900 uppercase">
-            University of
-            <br />
-            Calgary
-          </span>
+      <header className="border-b bg-white/80 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+          <div className="flex items-center gap-2">
+            <img src="/logo.png" alt="University Logo" className="h-10 w-10 rounded" />
+            <div className="flex flex-col leading-tight">
+              <span className="text-sm font-semibold">University Career Hub</span>
+              <span className="text-[10px] uppercase tracking-[0.22em] text-slate-500">UCalgary Students</span>
+            </div>
+          </div>
         </div>
-        <span className="hidden sm:inline text-xs text-neutral-500">Student Career Search</span>
       </header>
 
       {/* Body */}
