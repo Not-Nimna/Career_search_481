@@ -1,13 +1,25 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { FileText, Building2, Calendar, Clock, Search, ArrowRight, Filter, ExternalLink } from "lucide-react";
+import { Building2, Calendar, Clock, Search, ArrowRight, Filter, ExternalLink } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+
+// --- Types / Local Storage Key ---
+type SavedJob = {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  deadline: string;
+};
+
+const SAVED_JOBS_KEY = "careerhub_saved_jobs";
 
 // Mock applications (normally fetched from /api/applications)
 const APPLICATIONS = [
@@ -55,6 +67,18 @@ export default function ApplicationsPage() {
   const [query, setQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
 
+  // ✅ Initialize saved jobs directly from localStorage
+  const [savedJobs] = useState<SavedJob[]>(() => {
+    if (typeof window === "undefined") return [];
+    const raw = window.localStorage.getItem(SAVED_JOBS_KEY);
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as SavedJob[];
+    } catch {
+      return [];
+    }
+  });
+
   const filtered = useMemo(() => {
     return APPLICATIONS.filter((a) => {
       const matchesQuery = a.jobTitle.toLowerCase().includes(query.toLowerCase()) || a.company.toLowerCase().includes(query.toLowerCase());
@@ -62,6 +86,13 @@ export default function ApplicationsPage() {
       return matchesQuery && matchesStatus;
     });
   }, [query, filterStatus]);
+
+  const filteredSaved = useMemo(() => {
+    return savedJobs.filter((j) => {
+      const q = query.toLowerCase();
+      return j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q);
+    });
+  }, [query, savedJobs]);
 
   const shortSlug = (name: string) => name.split(" ")[0].toLowerCase();
 
@@ -164,6 +195,50 @@ export default function ApplicationsPage() {
             </Card>
           )}
         </div>
+
+        {/* Saved roles (from Home page) */}
+        {filteredSaved.length > 0 && (
+          <section className="mt-10 space-y-3">
+            <h2 className="text-lg font-semibold">Saved roles (not yet applied)</h2>
+            <p className="text-xs text-muted-foreground">These are jobs you saved from the home page. Use this list to decide what to apply to next.</p>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredSaved.map((job) => (
+                <Card key={job.id} className="rounded-2xl h-full hover:shadow-lg transition">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-base font-semibold leading-tight">{job.title}</h3>
+                        <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+                          <Building2 className="h-4 w-4" /> {job.company}
+                        </p>
+                      </div>
+                      <Badge className="rounded-full text-xs font-medium bg-slate-100 text-slate-800">Saved</Badge>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="text-sm text-muted-foreground space-y-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center gap-1">
+                        <Calendar className="h-4 w-4" /> Deadline {job.deadline}
+                      </span>
+                    </div>
+                    <div className="text-xs text-slate-500">{job.location}</div>
+                    <div className="text-xs text-slate-500">Type: {job.type}</div>
+                  </CardContent>
+
+                  <CardFooter className="justify-end">
+                    <Button variant="secondary" className="gap-2 w-full" asChild>
+                      <Link href={`/jobdetails${job.id}`}>
+                        Apply now <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </section>
+        )}
       </main>
 
       <footer className="border-t ">

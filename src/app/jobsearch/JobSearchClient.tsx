@@ -14,8 +14,8 @@ export type Job = {
   id: string;
   title: string;
   company: string;
-  location: string; // e.g., "Calgary, AB (Hybrid)" | "Remote – Canada" | "Vancouver, BC (On‑site)"
-  type: string; // Internship | Co‑op
+  location: string; // e.g., "Calgary, AB (Hybrid)" | "Remote – Canada" | "Vancouver, BC (On-site)"
+  type: string; // Internship | Co-op
   postedAt: string; // "2d" | "5h" | "4d"
   deadline: string; // "Nov 8"
   tags: string[];
@@ -23,6 +23,18 @@ export type Job = {
   responsibilities: string[];
   qualifications: string[];
 };
+
+// Saved job type shared with Home + Applications
+export type SavedJob = {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  deadline: string;
+};
+
+const SAVED_JOBS_KEY = "careerhub_saved_jobs";
 
 // --- Mock Data ---
 const JOBS: Job[] = [
@@ -35,22 +47,22 @@ const JOBS: Job[] = [
     postedAt: "2d",
     deadline: "Nov 8",
     tags: ["Python", "React", "AI"],
-    description: "Work with the platform team to build student‑facing robotics tooling. Collaborate across firmware and cloud to ship features fast.",
+    description: "Work with the platform team to build student-facing robotics tooling. Collaborate across firmware and cloud to ship features fast.",
     responsibilities: ["Implement UI components and write tests", "Ship REST endpoints and integrate telemetry", "Participate in code reviews and demos"],
     qualifications: ["Enrolled in a CS/SE program", "Experience with React + TypeScript", "Familiarity with Python APIs"],
   },
   {
     id: "2",
-    title: "Data Analyst Co‑op",
+    title: "Data Analyst Co-op",
     company: "Prairie Health System",
     location: "Remote – Canada",
-    type: "Co‑op",
+    type: "Co-op",
     postedAt: "1d",
     deadline: "Nov 12",
     tags: ["SQL", "Tableau", "ETL"],
-    description: "Analyze patient wait‑time data and build dashboards for operational insights across clinics.",
-    responsibilities: ["Create Tableau dashboards", "Automate ETL pipelines", "Present weekly findings"],
-    qualifications: ["SQL proficiency", "Experience with BI tools", "Strong communication"],
+    description: "Analyze patient wait-time data and build dashboards for operational insights across clinics.",
+    responsibilities: ["Create Tableau dashboards to track KPIs", "Automate ETL pipelines from clinical systems", "Present weekly findings to operations stakeholders"],
+    qualifications: ["SQL proficiency and experience querying large datasets", "Hands-on experience with at least one BI tool (e.g., Tableau, Power BI)", "Strong written and verbal communication skills"],
   },
   {
     id: "3",
@@ -62,26 +74,66 @@ const JOBS: Job[] = [
     deadline: "Nov 18",
     tags: ["AWS", "Terraform", "CI/CD"],
     description: "Help modernize infrastructure using Terraform and GitHub Actions. Work with platform engineers to improve developer experience.",
-    responsibilities: ["Write Terraform modules", "Build CI/CD workflows", "Monitor and document"],
-    qualifications: ["Familiar with AWS", "Knowledge of IaC concepts", "Scripting (Python/Bash)"],
+    responsibilities: ["Write and maintain Terraform modules for core services", "Build and monitor CI/CD workflows in GitHub Actions", "Document infrastructure changes and best practices"],
+    qualifications: ["Familiar with AWS or another major cloud provider", "Knowledge of Infrastructure as Code concepts", "Scripting experience in Python or Bash"],
   },
   {
     id: "4",
     title: "Product Design Intern",
     company: "Pixel & Pine",
-    location: "Vancouver, BC (On‑site)",
+    location: "Vancouver, BC (On-site)",
     type: "Internship",
     postedAt: "3d",
     deadline: "Nov 10",
     tags: ["Figma", "Prototyping", "UX"],
     description: "Work with design leads to prototype mobile experiences and run usability tests.",
-    responsibilities: ["Produce high‑fidelity prototypes", "Run moderated tests", "Iterate on feedback"],
-    qualifications: ["Figma expertise", "Portfolio of student projects", "Research fundamentals"],
+    responsibilities: ["Produce high-fidelity Figma prototypes for mobile and web", "Run moderated and unmoderated usability tests", "Synthesize feedback and iterate on design flows"],
+    qualifications: ["Figma expertise and comfort with component libraries", "Portfolio of student or side-project UX work", "Understanding of user research fundamentals"],
+  },
+  {
+    id: "5",
+    title: "Cybersecurity Co-op",
+    company: "Sentinel Networks",
+    location: "Edmonton, AB (Hybrid)",
+    type: "Co-op",
+    postedAt: "5h",
+    deadline: "Nov 5",
+    tags: ["Threat Intel", "Splunk", "Python"],
+    description: "Support the security operations team with threat detection, log analysis, and incident response automation.",
+    responsibilities: ["Monitor SIEM dashboards and investigate security alerts", "Write and tune detection rules in Splunk or similar tools", "Automate common investigation tasks using Python scripts"],
+    qualifications: ["Interest in cybersecurity, SOC, or incident response", "Basic familiarity with SIEM tools or log analysis", "Python scripting skills and comfort with Linux basics"],
+  },
+  {
+    id: "6",
+    title: "Machine Learning Intern",
+    company: "Maple Vision AI",
+    location: "Toronto, ON (Remote)",
+    type: "Internship",
+    postedAt: "5d",
+    deadline: "Nov 20",
+    tags: ["PyTorch", "CV", "MLOps"],
+    description: "Contribute to computer vision models used in production and help improve training and deployment pipelines.",
+    responsibilities: ["Train and evaluate CNN models in PyTorch on internal datasets", "Run experiments, log metrics, and compare model variants", "Help maintain data pipelines and model deployment scripts"],
+    qualifications: ["Coursework or projects in machine learning or deep learning", "Experience with PyTorch or TensorFlow", "Comfort working in Python and with Jupyter/Colab environments"],
   },
 ];
 
 // --- Utility helpers ---
-const MONTHS: Record<string, number> = { Jan: 0, Feb: 1, Mar: 2, Apr: 3, May: 4, Jun: 5, Jul: 6, Aug: 7, Sep: 8, Oct: 9, Nov: 10, Dec: 11 };
+const MONTHS: Record<string, number> = {
+  Jan: 0,
+  Feb: 1,
+  Mar: 2,
+  Apr: 3,
+  May: 4,
+  Jun: 5,
+  Jul: 6,
+  Aug: 7,
+  Sep: 8,
+  Oct: 9,
+  Nov: 10,
+  Dec: 11,
+};
+
 const parseDeadline = (dead: string): Date | null => {
   const [mon, dayStr] = dead.split(" ");
   const m = MONTHS[mon as keyof typeof MONTHS];
@@ -104,10 +156,10 @@ const matchesPostedWithin = (postedAt: string, window: "any" | "24h" | "3d" | "7
   return true;
 };
 
-const inferWorkMode = (location: string): "Remote" | "Hybrid" | "On‑site" | "Unspecified" => {
+const inferWorkMode = (location: string): "Remote" | "Hybrid" | "On-site" | "Unspecified" => {
   if (/remote/i.test(location)) return "Remote";
   if (/hybrid/i.test(location)) return "Hybrid";
-  if (/on.?site/i.test(location)) return "On‑site";
+  if (/on.?site/i.test(location)) return "On-site";
   return "Unspecified";
 };
 
@@ -176,7 +228,15 @@ function JobDetail({ job, saved, onSave }: { job: Job; saved: boolean; onSave: (
           </div>
           <div className="flex gap-2">
             <Button variant="secondary" className="gap-2" onClick={onSave} aria-label={saved ? "Saved" : "Save"}>
-              {saved ? <BookmarkCheck className="h-4 w-4" /> : <Bookmark className="h-4 w-4" />} {saved ? "Saved" : "Save"}
+              {saved ? (
+                <>
+                  <BookmarkCheck className="h-4 w-4" /> Saved
+                </>
+              ) : (
+                <>
+                  <Bookmark className="h-4 w-4" /> Save
+                </>
+              )}
             </Button>
             <Link href="/jobdetails">
               <Button variant="destructive" className="gap-2">
@@ -240,6 +300,24 @@ function JobDetail({ job, saved, onSave }: { job: Job; saved: boolean; onSave: (
 }
 
 // --- Filters UI ---
+export type Filters = {
+  workModes: string[];
+  types: string[];
+  tags: string[];
+  locations: string[];
+  postedWithin: "any" | "24h" | "3d" | "7d";
+  deadline: "any" | "next 7 days" | "before Nov 15";
+};
+
+const DEFAULT_FILTERS: Filters = {
+  workModes: [],
+  types: [],
+  tags: [],
+  locations: [],
+  postedWithin: "any",
+  deadline: "any",
+};
+
 function FiltersPopover({
   allTags,
   allTypes,
@@ -361,24 +439,6 @@ function FiltersPopover({
 }
 
 // --- Filters state & logic ---
-export type Filters = {
-  workModes: string[];
-  types: string[];
-  tags: string[];
-  locations: string[];
-  postedWithin: "any" | "24h" | "3d" | "7d";
-  deadline: "any" | "next 7 days" | "before Nov 15";
-};
-
-const DEFAULT_FILTERS: Filters = {
-  workModes: [],
-  types: [],
-  tags: [],
-  locations: [],
-  postedWithin: "any",
-  deadline: "any",
-};
-
 const getAllFacets = (jobs: Job[]) => {
   const allTags = unique(jobs.flatMap((j) => j.tags)).sort();
   const allTypes = unique(jobs.map((j) => j.type));
@@ -427,15 +487,51 @@ const applyFilters = (jobs: Job[], f: Filters): Job[] => {
 
 // --- Layout ---
 export default function JobSearchPage() {
-  const [query, setQuery] = useState("");
   const params = useSearchParams();
-  const q = params.get("q") || "";
-  //use the q to auto fill the search query on initial load
-  useEffect(() => {
-    setQuery(q);
-  }, [q]);
+  const initialQ = params.get("q") || "";
 
-  const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [query, setQuery] = useState(initialQ);
+
+  useEffect(() => {
+    setQuery(initialQ);
+  }, [initialQ]);
+
+  // ✅ Shared saved jobs state (synced with Home + Applications)
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>(() => {
+    if (typeof window === "undefined") return [];
+    const raw = window.localStorage.getItem(SAVED_JOBS_KEY);
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as SavedJob[];
+    } catch {
+      return [];
+    }
+  });
+
+  // ✅ Only write to localStorage from here (no setState in effect)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(SAVED_JOBS_KEY, JSON.stringify(savedJobs));
+  }, [savedJobs]);
+
+  const toggleSave = useCallback((job: Job) => {
+    setSavedJobs((prev) => {
+      const exists = prev.find((j) => j.id === job.id);
+      if (exists) {
+        return prev.filter((j) => j.id !== job.id);
+      }
+      const toSave: SavedJob = {
+        id: job.id,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        type: job.type,
+        deadline: job.deadline,
+      };
+      return [...prev, toSave];
+    });
+  }, []);
+
   const [selectedId, setSelectedId] = useState<string | null>(JOBS[0]?.id ?? null);
   const [filters, setFilters] = useState<Filters>(DEFAULT_FILTERS);
   const [showFilters, setShowFilters] = useState(false);
@@ -449,11 +545,6 @@ export default function JobSearchPage() {
 
   const filtered = useMemo(() => applyFilters(baseFiltered, filters), [baseFiltered, filters]);
 
-  // useEffect(() => {
-  //   if (filtered.length && !filtered.find((j) => j.id === selectedId)) {
-  //     setSelectedId(filtered[0].id);
-  //   }
-  // }, [filtered, selectedId]);
   const effectiveSelectedId = useMemo(() => {
     if (!filtered.length) return null;
     const exists = filtered.some((j) => j.id === selectedId);
@@ -461,10 +552,6 @@ export default function JobSearchPage() {
   }, [filtered, selectedId]);
 
   const selectedJob = useMemo(() => (effectiveSelectedId ? filtered.find((j) => j.id === effectiveSelectedId) ?? filtered[0] : undefined), [filtered, effectiveSelectedId]);
-
-  // const selectedJob = useMemo(() => filtered.find((j) => j.id === selectedId) || filtered[0], [filtered, selectedId]);
-
-  const toggleSave = useCallback((id: string) => setSaved((s) => ({ ...s, [id]: !s[id] })), []);
 
   const activeCount = useMemo(() => {
     const { workModes, types, tags, locations, postedWithin, deadline } = filters;
@@ -476,7 +563,7 @@ export default function JobSearchPage() {
       {/* Full-screen dim + blur when filters are open */}
       {showFilters && <div className="fixed inset-0 z-30 bg-black/30 backdrop-blur-sm" onClick={() => setShowFilters(false)} />}
 
-      {/* 🔺 Global top bar (same as home) + page search row */}
+      {/* Global top bar (same as home) */}
       <header className="sticky top-0 z-40 backdrop-blur bg-[#F8F7F4]/90 shadow-sm border-b border-zinc-200">
         {/* Top nav row */}
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
@@ -494,6 +581,7 @@ export default function JobSearchPage() {
           </Link>
         </div>
       </header>
+
       {/* Page-specific search + filters row */}
       <div className="border-t border-slate-100">
         <div className="relative mx-auto max-w-7xl px-4 py-3 flex items-center gap-3">
@@ -508,12 +596,9 @@ export default function JobSearchPage() {
               variant="secondary"
               className="h-10 px-4 gap-2 bg-zinc-800 text-white hover:bg-zinc-900 transition-all hover:-translate-y-[1px] hover:shadow-md"
               onClick={() => {
-                // right now this doesn’t need to do anything special,
-                // because filtering already happens off `query`.
-                // You *could* hook URL sync here later if you like.
                 const trimmed = query.trim();
                 if (!trimmed) return;
-                // e.g. console.log("Search clicked:", trimmed);
+                // You could sync to URL here if you want later
               }}>
               <Search className="h-4 w-4" />
               Search
@@ -528,7 +613,7 @@ export default function JobSearchPage() {
           {/* Filters Popover */}
           {showFilters && <FiltersPopover allTags={allTags} allTypes={allTypes} allWorkModes={allWorkModes} allLocations={allLocations} value={filters} onChange={setFilters} onClose={() => setShowFilters(false)} />}
 
-          {/* RIGHT: Back to search */}
+          {/* RIGHT: Back to home */}
           <Link href="/home" className="ml-auto">
             <Button variant="secondary" className="gap-2">
               ← Back to Home
@@ -552,7 +637,7 @@ export default function JobSearchPage() {
                 </button>
               </div>
 
-              {/* 🔍 Active filter indicator row */}
+              {/* Active filter indicator row */}
               {activeCount > 0 ? (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   <span className="text-[11px] uppercase tracking-wide text-slate-500">Active filters:</span>
@@ -649,9 +734,10 @@ export default function JobSearchPage() {
             </CardHeader>
 
             <CardContent className="p-3 pt-0 overflow-y-auto h-full space-y-3">
-              {filtered.map((job) => (
-                <JobListItem key={job.id} job={job} selected={effectiveSelectedId === job.id} saved={!!saved[job.id]} onSelect={() => setSelectedId(job.id)} onSave={() => toggleSave(job.id)} />
-              ))}
+              {filtered.map((job) => {
+                const isSaved = savedJobs.some((j) => j.id === job.id);
+                return <JobListItem key={job.id} job={job} selected={effectiveSelectedId === job.id} saved={isSaved} onSelect={() => setSelectedId(job.id)} onSave={() => toggleSave(job)} />;
+              })}
               {filtered.length === 0 && <div className="text-sm text-muted-foreground p-6 text-center">No results. Try adjusting filters.</div>}
             </CardContent>
           </Card>
@@ -661,7 +747,7 @@ export default function JobSearchPage() {
         <main className="lg:col-span-7 xl:col-span-8">
           {selectedJob ? (
             <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-              <JobDetail job={selectedJob} saved={!!saved[selectedJob.id]} onSave={() => toggleSave(selectedJob.id)} />
+              <JobDetail job={selectedJob} saved={savedJobs.some((j) => j.id === selectedJob.id)} onSave={() => toggleSave(selectedJob)} />
             </motion.div>
           ) : (
             <Card className="rounded-2xl">

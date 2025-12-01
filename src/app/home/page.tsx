@@ -1,7 +1,8 @@
 "use client";
-import React, { useMemo, useState } from "react";
+
+import React, { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, MapPin, Clock, ExternalLink, GraduationCap, Calendar, Briefcase, Building2, Filter, ArrowRight, Bookmark, X } from "lucide-react";
+import { Search, MapPin, Clock, ExternalLink, GraduationCap, Calendar, Briefcase, Building2, Filter, ArrowRight, Bookmark, BookmarkCheck, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -9,6 +10,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+
+// --- Types / Local Storage Key ---
+type SavedJob = {
+  id: string;
+  title: string;
+  company: string;
+  location: string;
+  type: string;
+  deadline: string;
+};
+
+const SAVED_JOBS_KEY = "careerhub_saved_jobs";
 
 // --- Mock Data ---
 const JOBS = [
@@ -75,18 +88,21 @@ const JOBS = [
 ];
 
 const DEADLINES = [
-  { label: "UCalgary CS Club — Hackathon Registration", date: "Nov 3", href: "#" },
-  { label: "Sentinel Networks — Cybersecurity Co-op", date: "Nov 5", href: "#" },
-  { label: "Apple Cupertino Online Assessment", date: "Nov 8", href: "#" },
-  { label: "Pixel & Pine — Product Design Intern", date: "Nov 10", href: "#" },
-  { label: "Prairie Health — Data Co-op", date: "Nov 12", href: "#" },
-  { label: "Aurora Robotics Lab — SWE Intern", date: "Nov 15", href: "#" },
-  { label: "Northstar Energy — DevOps Intern", date: "Nov 18", href: "#" },
-  { label: "Maple Vision AI — ML Intern", date: "Nov 20", href: "#" },
-  { label: "RBC — New Grad SWE", date: "Dec 1", href: "#" },
-  { label: "Google STEP Intern — Application", date: "Dec 5", href: "#" },
-  { label: "Amazon Propel — Online Assessment", date: "Dec 7", href: "#" },
-  { label: "TD — Data Science Co-op", date: "Dec 9", href: "#" },
+  {
+    label: "Aurora Robotics Lab — Software Engineering Intern",
+    date: "Nov 8",
+    href: "/jobsearch?q=Aurora%20Robotics%20Lab",
+  },
+  {
+    label: "Pixel & Pine — Product Design Intern",
+    date: "Nov 10",
+    href: "/jobsearch?q=Pixel%20%26%20Pine",
+  },
+  {
+    label: "Prairie Health System — Data Analyst Co-op",
+    date: "Nov 12",
+    href: "/jobsearch?q=Prairie%20Health%20System",
+  },
 ];
 
 const QUICK_LINKS = [
@@ -116,8 +132,8 @@ const QUICK_LINKS = [
   },
 ];
 
-// --- Components ---
-function JobCard({ job }: { job: (typeof JOBS)[number] }) {
+// --- Job Card ---
+function JobCard({ job, isSaved, onToggleSave }: { job: (typeof JOBS)[number]; isSaved: boolean; onToggleSave: () => void }) {
   return (
     <motion.div layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
       <Card className="rounded-2xl shadow-sm hover:shadow-md transition-all border border-zinc-200 bg-[#F4F4F3] hover:bg-[#EDEDED] hover:-translate-y-[1px]">
@@ -155,10 +171,18 @@ function JobCard({ job }: { job: (typeof JOBS)[number] }) {
           </div>
         </CardContent>
         <CardFooter className="flex items-center justify-between">
-          <Button variant="secondary" className="gap-2">
-            <Bookmark className="h-4 w-4" /> Save
+          <Button type="button" variant={isSaved ? "default" : "secondary"} className="gap-2" onClick={onToggleSave}>
+            {isSaved ? (
+              <>
+                <BookmarkCheck className="h-4 w-4" /> Saved
+              </>
+            ) : (
+              <>
+                <Bookmark className="h-4 w-4" /> Save
+              </>
+            )}
           </Button>
-          <Link href={"/jobdetails"}>
+          <Link href={`/jobdetails${job.id}`}>
             <Button variant="destructive" className="gap-2">
               View & Apply <ArrowRight className="h-4 w-4" />
             </Button>
@@ -174,11 +198,46 @@ export default function CareerHome() {
   const [onlyRemote, setOnlyRemote] = useState(false);
   const [showAllDeadlines, setShowAllDeadlines] = useState(false);
 
-  // NEW: resource modals
   const [showResumeModal, setShowResumeModal] = useState(false);
   const [showAdvisingModal, setShowAdvisingModal] = useState(false);
 
+  // ✅ Initialize from localStorage in the state initializer (not in an effect)
+  const [savedJobs, setSavedJobs] = useState<SavedJob[]>(() => {
+    if (typeof window === "undefined") return [];
+    const raw = window.localStorage.getItem(SAVED_JOBS_KEY);
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as SavedJob[];
+    } catch {
+      return [];
+    }
+  });
+
   const router = useRouter();
+
+  // ✅ Effect only writes to external system (localStorage) – no setState here
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(SAVED_JOBS_KEY, JSON.stringify(savedJobs));
+  }, [savedJobs]);
+
+  const toggleSaveJob = (job: (typeof JOBS)[number]) => {
+    setSavedJobs((prev) => {
+      const exists = prev.find((j) => j.id === job.id);
+      if (exists) {
+        return prev.filter((j) => j.id !== job.id);
+      }
+      const toSave: SavedJob = {
+        id: job.id,
+        title: job.title,
+        company: job.company,
+        location: job.location,
+        type: job.type,
+        deadline: job.deadline,
+      };
+      return [...prev, toSave];
+    });
+  };
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
@@ -211,7 +270,7 @@ export default function CareerHome() {
               Quick Links
             </a>
             <a className="hover:text-foreground" href="#resources">
-              Resources
+              Resource of the Day
             </a>
           </nav>
           <Link href="/profile">
@@ -268,7 +327,7 @@ export default function CareerHome() {
           </div>
 
           {/* Deadlines at a glance */}
-          <aside id="deadlines" className="lg:col-span-1 relative">
+          <aside id="deadlines" className="lg:col-span-1 relative scroll-mt-24">
             <Card className="rounded-2xl ">
               <CardHeader>
                 <div className="flex items-center gap-2">
@@ -341,7 +400,7 @@ export default function CareerHome() {
       </section>
 
       {/* Recommended Jobs */}
-      <section id="jobs" className="mx-auto max-w-7xl px-4 pb-12 ">
+      <section id="jobs" className="mx-auto max-w-7xl px-4 pb-12 scroll-mt-24">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-3xl font-light">Recomendations based on your recent interests </h2>
           <Link href="/jobsearch" passHref>
@@ -352,9 +411,10 @@ export default function CareerHome() {
           </Link>
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filtered.map((job) => (
-            <JobCard key={job.id} job={job} />
-          ))}
+          {filtered.map((job) => {
+            const isSaved = savedJobs.some((j) => j.id === job.id);
+            return <JobCard key={job.id} job={job} isSaved={isSaved} onToggleSave={() => toggleSaveJob(job)} />;
+          })}
           {filtered.length === 0 && (
             <Card className="sm:col-span-2 lg:col-span-3 rounded-2xl">
               <CardContent className="py-10 text-center text-muted-foreground">No matches yet. Try a different query or clear filters.</CardContent>
@@ -364,7 +424,7 @@ export default function CareerHome() {
       </section>
 
       {/* Quick Links */}
-      <section id="links" className="border">
+      <section id="links" className="border scroll-mt-24">
         <div className="mx-auto max-w-7xl px-4 py-10">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-3xl font-light">Quick Links</h2>
@@ -388,9 +448,9 @@ export default function CareerHome() {
       </section>
 
       {/* Resources & CTA */}
-      <section id="resources" className="mx-auto max-w-7xl px-4 py-12">
+      <section id="resources" className="mx-auto max-w-7xl px-4 py-12 scroll-mt-24">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-3xl font-light">Resources</h2>
+          <h2 className="text-3xl font-light">Resource of the Day</h2>
         </div>
         <Card className="rounded-2xl">
           <CardContent className="md:flex items-center justify-between gap-6 py-8">
@@ -431,10 +491,13 @@ export default function CareerHome() {
                     <h3 className="text-sm font-medium">Technical Internship Resume</h3>
                     <p className="text-xs text-muted-foreground">Focused on projects, skills, and impact for SWE / Data / ML roles.</p>
                   </div>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <ExternalLink className="h-4 w-4" />
-                    Open
-                  </Button>
+
+                  <a href="https://www.overleaf.com/latex/templates/ats-friendly-technical-resume/yrhtcnjyzgsf" target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <ExternalLink className="h-4 w-4" />
+                      Open
+                    </Button>
+                  </a>
                 </div>
 
                 <div className="rounded-xl border p-3 flex items-start justify-between gap-3">
@@ -442,10 +505,12 @@ export default function CareerHome() {
                     <h3 className="text-sm font-medium">Product / Design Resume</h3>
                     <p className="text-xs text-muted-foreground">Great for UX, product design, and HCI-heavy roles.</p>
                   </div>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <ExternalLink className="h-4 w-4" />
-                    Open
-                  </Button>
+                  <a href="https://blog.uxfol.io/product-designer-resume/" target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <ExternalLink className="h-4 w-4" />
+                      Open
+                    </Button>
+                  </a>
                 </div>
 
                 <div className="rounded-xl border p-3 flex items-start justify-between gap-3">
@@ -453,10 +518,12 @@ export default function CareerHome() {
                     <h3 className="text-sm font-medium">New Grad Resume</h3>
                     <p className="text-xs text-muted-foreground">Emphasizes internships, capstone, and leadership experience.</p>
                   </div>
-                  <Button variant="outline" size="sm" className="gap-1">
-                    <ExternalLink className="h-4 w-4" />
-                    Open
-                  </Button>
+                  <a href="https://careerservices.fas.harvard.edu/resources/bullet-point-resume-template/" target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" size="sm" className="gap-1">
+                      <ExternalLink className="h-4 w-4" />
+                      Open
+                    </Button>
+                  </a>
                 </div>
 
                 <p className="text-xs text-muted-foreground">Tip: Make a copy of any template and customize it per role. Keep a “master” version with everything, then trim to 1 page for each application.</p>

@@ -120,9 +120,8 @@ export default function ProfileSettings() {
     }
     // stub — replace with API call
     console.log({ profile, resumeFile, transcriptFile, avatar });
-    alert("Profile saved (mock). Wire this to your API.");
+    alert("Profile saved");
     setEditing(false);
-    router.push("/home");
   };
 
   return (

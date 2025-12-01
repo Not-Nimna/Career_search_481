@@ -28,21 +28,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* <nav className="hidden items-center gap-6 text-sm text-slate-600 md:flex">
-            <Link href="/jobsearch" className="hover:text-slate-900">
-              Job search
-            </Link>
-            <Link href="/deadlines" className="hover:text-slate-900">
-              Deadlines
-            </Link>
-            <Link href="/resources" className="hover:text-slate-900">
-              Resources
-            </Link>
-            <Link href="/applications" className="hover:text-slate-900">
-              Applications
-            </Link>
-          </nav> */}
-
           <div className="flex items-center gap-3">
             <Link href="/login">
               <Button variant="destructive" size="sm">
