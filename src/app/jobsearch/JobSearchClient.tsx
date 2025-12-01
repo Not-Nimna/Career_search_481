@@ -238,7 +238,7 @@ function JobDetail({ job, saved, onSave }: { job: Job; saved: boolean; onSave: (
                 </>
               )}
             </Button>
-            <Link href="/jobdetails">
+            <Link href={`/jobdetails${job.id}`} className="ml-auto">
               <Button variant="destructive" className="gap-2">
                 Apply Now <ArrowRight className="h-4 w-4" />
               </Button>
