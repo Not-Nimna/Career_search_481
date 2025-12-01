@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 
-// --- Types / Local Storage Key ---
+// --- Types / Local Storage Keys ---
 type SavedJob = {
   id: string;
   title: string;
@@ -19,10 +19,22 @@ type SavedJob = {
   deadline: string;
 };
 
-const SAVED_JOBS_KEY = "careerhub_saved_jobs";
+type ApplicationSummary = {
+  id: string;
+  jobTitle: string;
+  company: string;
+  location: string;
+  status: string;
+  submitted: string;
+  deadline: string;
+  type: string;
+};
 
-// Mock applications (normally fetched from /api/applications)
-const APPLICATIONS = [
+const SAVED_JOBS_KEY = "careerhub_saved_jobs";
+const APPLICATIONS_KEY = "careerhub_applications";
+
+// --- Seed applications (used if localStorage is empty) ---
+const APPLICATIONS_SEED: ApplicationSummary[] = [
   {
     id: "APP-2025-001",
     jobTitle: "Software Engg Intern",
@@ -67,7 +79,25 @@ export default function ApplicationsPage() {
   const [query, setQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string | null>(null);
 
-  // ✅ Initialize saved jobs directly from localStorage
+  // ✅ Applications now live in state + localStorage
+  const [applications, setApplications] = useState<ApplicationSummary[]>(() => {
+    if (typeof window === "undefined") return APPLICATIONS_SEED;
+    const raw = window.localStorage.getItem(APPLICATIONS_KEY);
+    if (!raw) return APPLICATIONS_SEED;
+    try {
+      return JSON.parse(raw) as ApplicationSummary[];
+    } catch {
+      return APPLICATIONS_SEED;
+    }
+  });
+
+  // keep localStorage in sync whenever applications change
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(applications));
+  }, [applications]);
+
+  // ✅ Saved jobs stay as before
   const [savedJobs] = useState<SavedJob[]>(() => {
     if (typeof window === "undefined") return [];
     const raw = window.localStorage.getItem(SAVED_JOBS_KEY);
@@ -80,12 +110,12 @@ export default function ApplicationsPage() {
   });
 
   const filtered = useMemo(() => {
-    return APPLICATIONS.filter((a) => {
+    return applications.filter((a) => {
       const matchesQuery = a.jobTitle.toLowerCase().includes(query.toLowerCase()) || a.company.toLowerCase().includes(query.toLowerCase());
       const matchesStatus = !filterStatus || a.status === filterStatus;
       return matchesQuery && matchesStatus;
     });
-  }, [query, filterStatus]);
+  }, [applications, query, filterStatus]);
 
   const filteredSaved = useMemo(() => {
     return savedJobs.filter((j) => {
@@ -137,7 +167,7 @@ export default function ApplicationsPage() {
 
         {/* Quick Filter Chips */}
         <div className="flex flex-wrap gap-2">
-          {[...new Set(APPLICATIONS.map((a) => a.status))].map((s) => (
+          {[...new Set(applications.map((a) => a.status))].map((s) => (
             <button key={s} onClick={() => setFilterStatus(filterStatus === s ? null : s)} className={`px-2.5 py-1 rounded-full border text-sm transition ${filterStatus === s ? "bg-slate-900 text-white border-slate-900" : "bg-white"}`}>
               {s}
             </button>
@@ -147,8 +177,7 @@ export default function ApplicationsPage() {
         {/* Application list */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((app) => {
-            const slug = shortSlug(app.company); // <-- generate URL like "aurora"
-
+            const slug = shortSlug(app.company); // e.g. "aurora"
             return (
               <Link key={app.id} href={`/${slug}application`} className="block">
                 <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>

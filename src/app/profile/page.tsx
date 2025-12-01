@@ -1,7 +1,7 @@
 "use client";
 import React, { useRef, useState } from "react";
 
-import { User2, Mail, Phone, Calendar, MapPin, Linkedin, Github, Globe, Plus, Trash2, Upload, X, Check, Home, Image as ImageIcon } from "lucide-react";
+import { User2, Mail, Phone, Calendar, MapPin, Linkedin, Github, Globe, Plus, Trash2, Upload, X, Check, Home, Image as ImageIcon, LogOut } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,8 @@ import { useRouter } from "next/navigation";
 const YEARS = Array.from({ length: 8 }, (_, i) => new Date().getFullYear() + i);
 
 export default function ProfileSettings() {
+  const router = useRouter();
+
   // --- Basic profile state ---
   const [profile, setProfile] = useState({
     firstName: "Jane",
@@ -81,7 +83,6 @@ export default function ProfileSettings() {
 
   const [roleInput, setRoleInput] = useState("");
   const [skillInput, setSkillInput] = useState("");
-  const router = useRouter();
 
   // ---- Missing / validation ----
   const missingBasic = {
@@ -126,6 +127,7 @@ export default function ProfileSettings() {
 
   return (
     <div className="min-h-screen bg-[#F8F7F4]">
+      {/* Header */}
       <header className="sticky top-0 z-30 border-b bg-[#F8F7F4]/90 backdrop-blur shadow-sm">
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -135,14 +137,17 @@ export default function ProfileSettings() {
             </Link>
           </div>
 
-          <Link href="/home">
-            <Button variant="destructive" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
-              <Home className="h-4 w-4" /> Home
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/home">
+              <Button variant="destructive" size="sm" className="gap-2 bg-slate-700 text-white hover:bg-slate-800 transition-all hover:-translate-y-[1px] hover:shadow-md">
+                <Home className="h-4 w-4" /> Home
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
+      {/* Top row with Edit / Save */}
       <div className="mx-auto max-w-6xl px-4 py-3 flex items-center justify-between">
         <div className="flex items-center gap-2">{/* title area if needed */}</div>
         <div className="flex gap-2">
@@ -556,6 +561,18 @@ export default function ProfileSettings() {
               </div>
             </CardContent>
           </Card>
+          <div className="flex justify-end">
+            <Button
+              variant="destructive"
+              size="sm"
+              className="gap-2"
+              onClick={() => {
+                // if you add auth later, call signOut() here first
+                router.push("/");
+              }}>
+              <LogOut className="h-4 w-4" /> Log out
+            </Button>
+          </div>
         </section>
       </main>
 

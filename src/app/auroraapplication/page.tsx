@@ -1,12 +1,15 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useState } from "react";
 import { ArrowLeft, FileText, FileDown, Building2, Calendar, Clock, CheckCircle2, MessageSquare, Printer, Share2, Download, ExternalLink, Link as LinkIcon, Paperclip, MapPin, User2, Mail, ChevronRight, XCircle } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
+
+// --- Shared LS key must match ApplicationsPage ---
+const APPLICATIONS_KEY = "careerhub_applications";
 
 // --- Types ---
 type ApplicationStatus = "Submitted" | "Under Review" | "Interview_Scheduled" | "Offer" | "Rejected";
@@ -46,6 +49,17 @@ type Application = {
   timeline: { when: string; label: string }[];
 };
 
+type StoredApplicationSummary = {
+  id: string;
+  jobTitle: string;
+  company: string;
+  location: string;
+  status: string;
+  submitted: string;
+  deadline: string;
+  type: string;
+};
+
 // --- Status styles ---
 const STATUS_STYLES: Record<ApplicationStatus, string> = {
   Submitted: "bg-slate-100 text-slate-800",
@@ -55,7 +69,7 @@ const STATUS_STYLES: Record<ApplicationStatus, string> = {
   Rejected: "bg-rose-100 text-rose-800",
 };
 
-// --- Mock data ---
+// --- Mock data (detail view) ---
 const MOCK_APP: Application = {
   id: "APP-2025-001",
   status: "Under Review",
@@ -113,8 +127,28 @@ const fmtTime = (iso: string) =>
 
 // --- Component ---
 export default function ApplicationDetailCompleted() {
-  const app = useMemo(() => MOCK_APP, []);
+  const [app] = useState<Application>(MOCK_APP);
   const [note, setNote] = useState("");
+
+  const handleWithdraw = () => {
+    const confirmed = confirm("Withdraw this application? It will be removed from your Applications list.");
+    if (!confirmed) return;
+
+    if (typeof window !== "undefined") {
+      try {
+        const raw = window.localStorage.getItem(APPLICATIONS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw) as StoredApplicationSummary[];
+          const remaining = parsed.filter((a) => a.id !== app.id);
+          window.localStorage.setItem(APPLICATIONS_KEY, JSON.stringify(remaining));
+        }
+      } catch {
+        // ignore parse errors, just fall through to redirect
+      }
+      // Go back to Applications page after withdrawing
+      window.location.href = "/Applications";
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F8F7F4]">
@@ -312,7 +346,7 @@ export default function ApplicationDetailCompleted() {
             </CardContent>
           </Card>
 
-          {/* Notes (personal) */}
+          {/* Notes */}
           <Card className="rounded-2xl">
             <CardHeader>
               <h2 className="text-lg font-semibold">Your notes</h2>
@@ -371,7 +405,7 @@ export default function ApplicationDetailCompleted() {
               <Button variant="secondary" className="w-full gap-2" onClick={() => alert("Message sent (mock)")}>
                 <MessageSquare className="h-4 w-4" /> Message recruiter
               </Button>
-              <Button variant="ghost" className="w-full gap-2 text-rose-600 hover:text-rose-700" onClick={() => confirm("Withdraw this application?") && alert("Application withdrawn (mock)")}>
+              <Button variant="ghost" className="w-full gap-2 text-rose-600 hover:text-rose-700" onClick={handleWithdraw}>
                 <XCircle className="h-4 w-4" /> Withdraw application
               </Button>
             </CardFooter>

@@ -34,6 +34,20 @@ const ACCEPT = {
   extras: ["application/pdf", "application/zip"],
 };
 
+// ✅ Shared key + shape used by /Applications page
+const APPLICATIONS_KEY = "careerhub_applications";
+
+type StoredApplicationSummary = {
+  id: string;
+  jobTitle: string;
+  company: string;
+  location: string;
+  status: string;
+  submitted: string;
+  deadline: string;
+  type: string;
+};
+
 export default function AuroraSinglePageApply() {
   const [submitting, setSubmitting] = useState(false);
   const [appId, setAppId] = useState<string | null>(null);
@@ -45,14 +59,11 @@ export default function AuroraSinglePageApply() {
       title: "Software Engineering Intern",
       company: "Aurora Robotics Lab",
       location: "Calgary, AB (Hybrid)",
-      deadline: "Nov 8",
+      // match what you want to show in Applications list
+      deadline: "Nov 8, 2025",
     }),
     []
   );
-
-  type PersonalState = {
-    workMode: WorkMode | null;
-  };
 
   // ---- Personal ----
   const [personal, setPersonal] = useState({
@@ -115,7 +126,7 @@ export default function AuroraSinglePageApply() {
   const handleBackClick = () => {
     const confirmed = window.confirm("If you go back now, you will lose all progress on this application. Do you want to continue?");
     if (!confirmed) return;
-    router.push("/jobdetails");
+    router.push("/jobdetails1");
   };
 
   const humanFile = (f: File | null) => (f ? `${f.name} · ${(f.size / 1_000_000).toFixed(2)} MB` : "No file");
@@ -144,10 +155,45 @@ export default function AuroraSinglePageApply() {
   const submit = async () => {
     if (!canSubmit) return;
     setSubmitting(true);
+
     // Simulated API
     await new Promise((r) => setTimeout(r, 900));
-    setAppId("APP-2025-001");
+
+    const generatedId = "APP-2025-001"; // keep in sync with your Aurora detail page
+
+    // ✅ Push / update this application into localStorage so it appears on /Applications
+    if (typeof window !== "undefined") {
+      try {
+        const raw = window.localStorage.getItem(APPLICATIONS_KEY);
+        const existing = raw ? (JSON.parse(raw) as StoredApplicationSummary[]) : [];
+
+        const submittedDate = new Date().toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        });
+
+        const summary: StoredApplicationSummary = {
+          id: generatedId,
+          jobTitle: job.title,
+          company: job.company,
+          location: job.location,
+          status: "Under Review", // or "Submitted" if you want
+          submitted: submittedDate,
+          deadline: job.deadline,
+          type: "Internship",
+        };
+
+        const filtered = existing.filter((a) => a.id !== summary.id);
+        window.localStorage.setItem(APPLICATIONS_KEY, JSON.stringify([...filtered, summary]));
+      } catch (e) {
+        console.error("Failed to update applications in localStorage", e);
+      }
+    }
+
+    setAppId(generatedId);
     setSubmitting(false);
+
     // Scroll to confirmation
     document.getElementById("review")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -282,7 +328,17 @@ export default function AuroraSinglePageApply() {
 
                 <div className="md:col-span-2 text-sm">
                   <label className="inline-flex items-center gap-2">
-                    <input type="checkbox" className={`h-4 w-4 ${missingPersonal.consent ? "ring-1 ring-rose-400" : ""}`} checked={personal.consent} onChange={(e) => setPersonal({ ...personal, consent: e.target.checked })} />
+                    <input
+                      type="checkbox"
+                      className={`h-4 w-4 ${missingPersonal.consent ? "ring-1 ring-rose-400" : ""}`}
+                      checked={personal.consent}
+                      onChange={(e) =>
+                        setPersonal({
+                          ...personal,
+                          consent: e.target.checked,
+                        })
+                      }
+                    />
                     <span>
                       I consent to share my application data with Aurora Robotics Lab.
                       {missingPersonal.consent && <span className="ml-2 text-[11px] text-rose-600 font-medium">Required</span>}
@@ -577,7 +633,7 @@ export default function AuroraSinglePageApply() {
               </CardContent>
               <CardFooter className="flex justify-between">
                 <div className="text-xs text-muted-foreground">You can edit above before submitting.</div>
-                <Button variant="destructive" onClick={submit} disabled={!canSubmit}>
+                <Button variant="destructive" onClick={submit} disabled={!canSubmit || submitting}>
                   <FileText className="h-4 w-4" /> {submitting ? "Submitting…" : "Submit Application"}
                 </Button>
               </CardFooter>
