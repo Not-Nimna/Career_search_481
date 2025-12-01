@@ -50,7 +50,7 @@ const APPLICATIONS_SEED: ApplicationSummary[] = [
     jobTitle: "Data Analyst Co-op",
     company: "Prairie Health System",
     location: "Remote – Canada",
-    status: "Interview Scheduled",
+    status: "Applied",
     submitted: "Oct 15, 2025",
     deadline: "Nov 12, 2025",
     type: "Co-op",
@@ -148,6 +148,8 @@ export default function ApplicationsPage() {
 
       <main className="mx-auto max-w-6xl px-4 py-6 space-y-6">
         {/* Title + Search Row */}
+        <h2 className="text-5xl font-light">Applications </h2>
+
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <div className="relative w-[min(60vw,360px)]">

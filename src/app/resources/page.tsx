@@ -368,6 +368,8 @@ export default function ResourcesPage() {
 
       <main className="mx-auto max-w-7xl px-4 py-6 space-y-8">
         {/* Filters */}
+        <h2 className="text-5xl font-light">Resources </h2>
+
         <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative w-[min(60vw,480px)]">

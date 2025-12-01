@@ -419,6 +419,8 @@ export default function NetworkingPage() {
 
       {/* Search + back button */}
       <div className="mx-auto max-w-7xl px-4 pt-4">
+        <h2 className="text-5xl font-light pb-4 ">Networking </h2>
+
         <div className="flex flex-wrap items-center gap-3 justify-between">
           <div className="flex items-center gap-2 w-full max-w-md">
             <div className="relative flex-1">
