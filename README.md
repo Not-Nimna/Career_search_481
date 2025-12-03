@@ -1,8 +1,3 @@
-Here is a **clean, professional, GitHub-ready README.md** tailored for your Career Search / UCalgary job portal Next.js app.
-I can customize it further (screenshots, badges, env instructions, architecture diagram, etc.) if you want.
-
----
-
 # 🎓 UCalgary Career Search Portal
 
 *A modern, student-focused job discovery and application tracking platform built with Next.js.*
