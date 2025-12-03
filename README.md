@@ -149,4 +149,4 @@ npm run start
 
 ## 📄 License
 
-MIT License © 2024 Nimna Wijedasa
+MIT License © 2024
