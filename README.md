@@ -1,36 +1,157 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Here is a **clean, professional, GitHub-ready README.md** tailored for your Career Search / UCalgary job portal Next.js app.
+I can customize it further (screenshots, badges, env instructions, architecture diagram, etc.) if you want.
 
-## Getting Started
+---
 
-First, run the development server:
+# 🎓 UCalgary Career Search Portal
+
+*A modern, student-focused job discovery and application tracking platform built with Next.js.*
+
+## 🚀 Overview
+
+The **Career Search Portal** is a redesigned and fully interactive job-search experience for University of Calgary students.
+It centralizes job browsing, application submission, deadline tracking, networking, and career resources into one clean, intuitive interface.
+
+This project was built using **Next.js 14 (App Router)**, **TypeScript**, **TailwindCSS**, and **Shadcn/UI**.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Next.js 14 – App Router**
+* **React 18**
+* **TypeScript**
+* **TailwindCSS**
+* **Shadcn/UI components**
+* **Lucide Icons**
+* **Framer Motion** (animations)
+* **Google Identity Services (optional)**
+
+---
+
+## 📦 Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/your-username/your-repo-name.git
+cd your-repo-name
+```
+
+Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+---
+
+## ▶️ Running the Development Server
+
+Start the dev server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+👉 **[http://localhost:3000](http://localhost:3000)**
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Any changes made inside `/app` will hot-reload automatically.
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 🔐 Environment Variables (Optional)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If using Google login or any authentication layer:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Create a `.env.local` file:
 
-## Deploy on Vercel
+```
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_CLIENT_SECRET=your_client_secret
+NEXTAUTH_SECRET=your_secret
+NEXTAUTH_URL=http://localhost:3000
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📁 Project Structure
+
+```
+app/
+ ├── layout.tsx           # Root layout
+ ├── page.tsx             # Landing page
+ ├── dashboard/           # Student dashboard
+ ├── applications/        # Application tracker
+ ├── deadlines/           # Deadlines viewer
+ ├── networking/          # Networking hub
+components/
+ ├── ui/                  # Shadcn components
+providers/
+ ├── AuthProvider.tsx
+ └── QueryProvider.tsx
+public/
+styles/
+└── globals.css
+```
+
+---
+
+## ✨ Features
+
+### 🔍 Job Discovery
+
+* Browse internships, co-ops, and entry-level roles
+* Filter by location, type, remote status
+* Personalized recommendations
+
+### Application Tracking
+
+* Track application status (Submitted → Under Review → Interview → Decision)
+* Upload supporting documents
+* View detailed progress timeline
+
+### Deadline Management
+
+* Centralized calendar of upcoming job deadlines
+* “Deadlines At a Glance” widget
+
+### Student Profile
+
+* Personal info
+* Skills
+* Education
+* Uploaded documents (Resume, Transcript)
+
+### Networking Hub
+
+* View mentors, student reps, and connections
+* Send messages / start chats
+
+### Career Resources
+
+* Resume templates, interview prep, workshops
+* Save resources for later access
+
+---
+
+## Running the Production Build
+
+Create a production build:
+
+```bash
+npm run build
+npm run start
+```
+
+
+
+## 📄 License
+
+MIT License © 2024 Nimna Wijedasa
