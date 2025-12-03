@@ -227,10 +227,7 @@ export default function ApplicationDetailCompleted() {
               <p>Thanks for applying! Below are the files and responses you submitted. We will email you about next steps. You can track changes to your status on this page.</p>
             </CardContent>
             <CardFooter className="justify-end gap-2">
-              <Button variant="secondary" className="gap-2" onClick={() => (window.location.href = "/jobs/aurora-robotics-lab")}>
-                View Job <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/apply/aurora-robotics-lab")}>
+              <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/jobdetails1")}>
                 Apply Again <ChevronRight className="h-4 w-4" />
               </Button>
             </CardFooter>
@@ -425,7 +422,7 @@ export default function ApplicationDetailCompleted() {
               </div>
               <div className="flex items-center gap-2">
                 <LinkIcon className="h-4 w-4" />
-                <a className="underline" href="/jobs/aurora-robotics-lab">
+                <a className="underline" href="/jobdetails1">
                   Job posting
                 </a>
               </div>

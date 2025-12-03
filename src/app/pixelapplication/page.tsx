@@ -246,10 +246,7 @@ export default function PixelPineApplicationDetail() {
               <p>This role focuses on producing high-fidelity prototypes, running moderated usability tests, and iterating quickly based on feedback from design leads and users.</p>
             </CardContent>
             <CardFooter className="justify-end gap-2">
-              <Button variant="secondary" className="gap-2" onClick={() => (window.location.href = "/jobs/pixel-and-pine-product-design-intern")}>
-                View Job <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/apply/pixel-and-pine-product-design-intern")}>
+              <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/jobdetails4")}>
                 Apply Again <ChevronRight className="h-4 w-4" />
               </Button>
             </CardFooter>
@@ -444,7 +441,7 @@ export default function PixelPineApplicationDetail() {
               </div>
               <div className="flex items-center gap-2">
                 <LinkIcon className="h-4 w-4" />
-                <a className="underline" href="/jobs/pixel-and-pine-product-design-intern">
+                <a className="underline" href="/jobdetails4">
                   Job posting
                 </a>
               </div>

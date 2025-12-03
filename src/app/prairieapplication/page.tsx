@@ -239,10 +239,7 @@ export default function PrairieHealthApplicationDetail() {
               <p>This role focuses on building Tableau dashboards, automating ETL pipelines, and presenting weekly findings to stakeholders.</p>
             </CardContent>
             <CardFooter className="justify-end gap-2">
-              <Button variant="secondary" className="gap-2" onClick={() => (window.location.href = "/jobs/prairie-health-system-data-analyst-coop")}>
-                View Job <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/apply/prairie-health-system-data-analyst-coop")}>
+              <Button variant="destructive" className="gap-2" onClick={() => (window.location.href = "/jobdetails2")}>
                 Apply Again <ChevronRight className="h-4 w-4" />
               </Button>
             </CardFooter>
@@ -436,7 +433,7 @@ export default function PrairieHealthApplicationDetail() {
               </div>
               <div className="flex items-center gap-2">
                 <LinkIcon className="h-4 w-4" />
-                <a className="underline" href="/jobs/prairie-health-system-data-analyst-coop">
+                <a className="underline" href="/jobdetails2">
                   Job posting
                 </a>
               </div>
