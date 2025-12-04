@@ -1,7 +1,13 @@
+
+
 # 🎓 UCalgary Career Search Portal
 
 *A modern, student-focused job discovery and application tracking platform built with Next.js.*
 
+🔗 **Live Demo:**
+[https://careersearchapp.netlify.app/](https://careersearchapp.netlify.app/)
+
+---
 ## 🚀 Overview
 
 The **Career Search Portal** is a redesigned and fully interactive job-search experience for University of Calgary students.
